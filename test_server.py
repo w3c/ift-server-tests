@@ -42,8 +42,7 @@ class ServerConformanceTest(unittest.TestCase):
     pass
 
   def request(self, path, data):
-    req = urllib.request.Request("%s%s" % (self.server_address, path),
-                                 data=data)
+    req = urllib.request.Request(f"{self.server_address}{path}", data=data)
     return urllib.request.build_opener(IgnoreHttpErrors).open(req)
 
   ### Test Methods ###
