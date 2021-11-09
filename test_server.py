@@ -16,6 +16,7 @@ import unittest
 
 import urllib.request
 import sys
+from response_checker import ResponseChecker
 
 
 def print_usage():
@@ -43,20 +44,15 @@ class ServerConformanceTest(unittest.TestCase):
 
   def request(self, path, data):
     req = urllib.request.Request(f"{self.server_address}{path}", data=data)
-    return urllib.request.build_opener(IgnoreHttpErrors).open(req)
+    return ResponseChecker(
+        self,
+        urllib.request.build_opener(IgnoreHttpErrors).open(req))
 
   ### Test Methods ###
 
-  def test_accepts_well_formed_request(self):
+  def test_initial_request_get(self):
     response = self.request(self.font_path, data=None)
-    # TODO(garretrieger): send actual valid request, including magic number.
-    # TODO(garretrieger): GET and POST
-    self.assertEqual(response.status, 200, response.url)
-
-  def test_rejects_not_found_font(self):
-    # TODO(garretrieger): request data should be wellformed.
-    response = self.request("/notfound", data=None)
-    self.assertNotEqual(response.status, 200, response.url)
+    response.successful_response_checks()
 
 
 if __name__ == '__main__':
