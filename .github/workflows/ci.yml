@@ -1,0 +1,18 @@
+on: [push, pull_request]
+name: Continous Integration
+jobs:
+    
+  check_formatting:
+    name: Check Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v1
+        
+      - name: Instal yapf and pylint
+        run: |
+          pip install yapf
+          pip install pylint
+
+      - name: Run Check Script
+        run: ./check-format.sh
