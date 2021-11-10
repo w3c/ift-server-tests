@@ -14,5 +14,5 @@ class ResponseChecker:
 
   def successful_response_checks(self):
     self.test_case.assertEqual(self.status_code, 200, self.url)
-    self.test_case.assertEqual(self.response_data[:4], [0x49, 0x46, 0x54, 0x20],
+    self.test_case.assertEqual(self.response_data[:4], bytes([0x49, 0x46, 0x54, 0x20]),
                                self.url)

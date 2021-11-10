@@ -17,6 +17,7 @@ import unittest
 import urllib.request
 import sys
 from response_checker import ResponseChecker
+from sample_requests import ValidRequests
 
 
 def print_usage():
@@ -43,15 +44,28 @@ class ServerConformanceTest(unittest.TestCase):
     pass
 
   def request(self, path, data):
-    req = urllib.request.Request(f"{self.server_address}{path}", data=data)
+    if data is not None:
+      headers = {
+          "Content-Type": "application/binary",
+      }
+    else:
+      headers = {}
+    req = urllib.request.Request(f"{self.server_address}{path}",
+                                 headers=headers,
+                                 data=data)
     return ResponseChecker(
         self,
         urllib.request.build_opener(IgnoreHttpErrors).open(req))
 
   ### Test Methods ###
 
-  def test_initial_request_get(self):
-    response = self.request(self.font_path, data=None)
+  # TODO(garretrieger): consider writing a parameterized tests against the set of all valid
+  #                     requests. Plus individual tests as needed to check special cases.
+
+  # TODO(garretrieger): test for GET.
+  def test_minimal_request_post(self):
+    response = self.request(self.font_path,
+                            data=ValidRequests.MINIMAL_REQUEST)
     response.successful_response_checks()
 
 
