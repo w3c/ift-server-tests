@@ -44,6 +44,7 @@ class ServerConformanceTest(unittest.TestCase):
     pass
 
   def request(self, path, data):
+    """Send a HTTP request to path."""
     if data is not None:
       headers = {
           "Content-Type": "application/binary",
@@ -64,8 +65,7 @@ class ServerConformanceTest(unittest.TestCase):
 
   # TODO(garretrieger): test for GET.
   def test_minimal_request_post(self):
-    response = self.request(self.font_path,
-                            data=ValidRequests.MINIMAL_REQUEST)
+    response = self.request(self.font_path, data=ValidRequests.MINIMAL_REQUEST)
     response.successful_response_checks()
 
 
