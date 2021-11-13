@@ -3,6 +3,8 @@ Helper for checking common cases on incremental font transfer server responses.
 """
 
 from cbor2 import loads
+import subprocess
+import tempfile
 
 # PatchResponse Fields
 
@@ -44,6 +46,30 @@ class ResponseChecker:
         f"Missing magic number 'IFT ' for {self.url} (2.5)")
 
     self.response_well_formed()
+    return self
+
+  def format_is(self, patch_format):
+    response = self.response()
+    self.test_case.assertEqual(response[PATCH_FORMAT], patch_format)
+    return self
+
+  def check_apply_patch_to(self, base, min_codepoints):
+    response = self.response()
+
+    if REPLACEMENT in response:
+      base = bytes([])
+      patch = response[REPLACEMENT]
+    else:
+      patch = response[PATCH]
+
+    subset = self.decode_patch(base, patch, response[PATCH_FORMAT])
+    # TODO(garretrieger): add assert message
+    self.test_case.assertTrue(len(subset) > 0)
+    self.font_has_at_least_codepoints(subset, min_codepoints)
+
+    # TODO(garretrieger): test checksums
+    # TODO(garretrieger): font shapes identical to original for subset codepoints.
+
 
   def response(self):
     """Returns the decoded cbor response object."""
@@ -84,3 +110,29 @@ class ResponseChecker:
       self.integer_list_well_formed(response[CODEPOINT_ORDERING])
       self.test_case.assertTrue(isinstance(response[ORDERING_CHECKSUM], int),
                                 "ordering_checksum must be set. (2.3.4)")
+
+    return self
+
+  def font_has_at_least_codepoints(self, font, subset):
+    # TODO(garretrieger): implement.
+    pass
+
+  def decode_patch(self, base, patch, patch_format):
+    if patch_format == VCDIFF:
+      with (tempfile.NamedTemporaryFile() as patch_file,
+            tempfile.NamedTemporaryFile() as base_file,
+            tempfile.NamedTemporaryFile() as subset_file):
+
+        base_file.write(base)
+        base_file.flush()
+        patch_file.write(patch)
+        patch_file.flush()
+
+        result = subprocess.run(["xdelta3", "-f", "-d", "-s",
+                                 base_file.name,
+                                 patch_file.name,
+                                 subset_file.name])
+        self.test_case.assertEqual(result.returncode, 0)
+        return subset_file.read()
+    else:
+      self.test_case.fail(f"Unsupported patch_format {patch_format}")

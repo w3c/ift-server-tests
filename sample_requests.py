@@ -38,6 +38,6 @@ class ValidRequests:
 
   MINIMAL_REQUEST = dumps({
       PROTOCOL_VERSION: 0,
-      ACCEPT_PATCH_FORMAT: [BROTLI],  # TODO(garretrieger): change to VCDIFF
+      ACCEPT_PATCH_FORMAT: [VCDIFF],
       CODEPOINTS_NEEDED: COMPRESSED_SET_41,
   })

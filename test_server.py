@@ -16,6 +16,7 @@ import unittest
 
 import urllib.request
 import sys
+from response_checker import VCDIFF
 from response_checker import ResponseChecker
 from sample_requests import ValidRequests
 
@@ -66,7 +67,11 @@ class ServerConformanceTest(unittest.TestCase):
   # TODO(garretrieger): test for GET.
   def test_minimal_request_post(self):
     response = self.request(self.font_path, data=ValidRequests.MINIMAL_REQUEST)
-    response.successful_response_checks()
+    (response
+     .successful_response_checks()
+     .format_is(VCDIFF)
+     .check_apply_patch_to(None, {0x41}))
+
 
 
 if __name__ == '__main__':
