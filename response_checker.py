@@ -27,6 +27,10 @@ BROTLI = 1
 PATCH_FORMATS = {VCDIFF, BROTLI}
 
 
+def spec_link(tag):
+  return f"https://w3c.github.io/IFT/Overview.html#{tag}"
+
+
 class ResponseChecker:
   """Defines a set of common checks against a IFT server response."""
 
@@ -37,6 +41,11 @@ class ResponseChecker:
     self.response_obj = None
     self.url = response.url
 
+  def conform_message(self, tag, message):
+    return (f"Failed requirement {spec_link(tag)}\n"
+            f"  {message}\n"
+            f"  Request URL: {self.url}")
+
   def successful_response_checks(self):
     """Checks all of the invariants that should be true on a successful response."""
     self.test_case.assertEqual(
@@ -44,7 +53,8 @@ class ResponseChecker:
         f"Status code must be success (200) for {self.url} (2.5)")
     self.test_case.assertEqual(
         self.response_data[:4], bytes([0x49, 0x46, 0x54, 0x20]),
-        f"Missing magic number 'IFT ' for {self.url} (2.5)")
+        self.conform_message("conform-magic-number",
+                             "Missing magic number 'IFT '"))
 
     self.response_well_formed()
     return self
