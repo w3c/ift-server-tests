@@ -67,8 +67,8 @@ class ServerConformanceTest(unittest.TestCase):
   # TODO(garretrieger): test for GET.
   def test_minimal_request_post(self):
     response = self.request(self.font_path, data=ValidRequests.MINIMAL_REQUEST)
-    (response.successful_response_checks().format_is(
-        VCDIFF).check_apply_patch_to(None, {0x41}))
+    (response.successful_response_checks().format_in(
+        {VCDIFF}).check_apply_patch_to(None, {0x41}))
 
 
 if __name__ == '__main__':

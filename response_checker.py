@@ -50,7 +50,9 @@ class ResponseChecker:
     """Checks all of the invariants that should be true on a successful response."""
     self.test_case.assertEqual(
         self.status_code, 200,
-        f"Status code must be success (200) for {self.url} (2.5)")
+        self.conform_message("conform-successful-response",
+                             "Status code must be success (200)"))
+
     self.test_case.assertEqual(
         self.response_data[:4], bytes([0x49, 0x46, 0x54, 0x20]),
         self.conform_message("conform-magic-number",
@@ -59,9 +61,15 @@ class ResponseChecker:
     self.response_well_formed()
     return self
 
-  def format_is(self, patch_format):
+  def format_in(self, patch_formats):
+    """Checks that format is one of the provided formats."""
     response = self.response()
-    self.test_case.assertEqual(response[PATCH_FORMAT], patch_format)
+    self.test_case.assertTrue(
+        response[PATCH_FORMAT] in patch_formats,
+        self.conform_message(
+            "conform-response-patch-format",
+            f"Patch format ({response[PATCH_FORMAT]}) must be "
+            f"one of {patch_formats}"))
     return self
 
   def check_apply_patch_to(self, base, min_codepoints):
@@ -75,8 +83,6 @@ class ResponseChecker:
       patch = response[PATCH]
 
     subset = self.decode_patch(base, patch, response[PATCH_FORMAT])
-    # TODO(garretrieger): add assert message
-    self.test_case.assertTrue(len(subset) > 0)
     self.font_has_at_least_codepoints(subset, min_codepoints)
 
     # TODO(garretrieger): test checksums
@@ -86,8 +92,10 @@ class ResponseChecker:
     """Returns the decoded cbor response object."""
     if self.response_obj is None:
       self.response_obj = loads(self.response_data[4:])
-      self.test_case.assertTrue(isinstance(self.response_obj, dict),
-                                "response should be a dict. (2.3.4)")
+      self.test_case.assertTrue(
+          isinstance(self.response_obj, dict),
+          self.conform_message("conform-object",
+                               "response must be a CBOR map."))
 
     return self.response_obj
 
@@ -98,34 +106,49 @@ class ResponseChecker:
   def response_well_formed(self):
     """Checks the CBOR response object is well formed according to the spec."""
     response = self.response()
-    self.test_case.assertTrue(PROTOCOL_VERSION in response,
-                              "protocol_version must be set (2.3.4)")
-    self.test_case.assertEqual(response[PROTOCOL_VERSION], 0,
-                               "protocol_version must be set to 0 (2.3.4)")
+    self.test_case.assertTrue(
+        PROTOCOL_VERSION in response,
+        self.conform_message("conform-response-protocol-version",
+                             "protocol_version must be set."))
+
+    self.test_case.assertEqual(
+        response[PROTOCOL_VERSION], 0,
+        self.conform_message("conform-response-protocol-version",
+                             "protocol_version must be set to 0."))
+
     self.test_case.assertTrue(
         response[PATCH_FORMAT] in PATCH_FORMATS,
-        f"patch_format {response[PATCH_FORMAT]} not in {PATCH_FORMATS}. (2.3.4)"
-    )
+        self.conform_message(
+            "conform-response-valid-format",
+            f"patch_format {response[PATCH_FORMAT]} not in {PATCH_FORMATS}."))
 
     self.test_case.assertTrue(
         bool(PATCH in response) != bool(REPLACEMENT in response),
-        "Only one of patch or replacement can be set. (2.3.4)")
+        self.conform_message("conform-response-patch-or-replacement",
+                             "Only one of patch or replacement can be set."))
+
     if PATCH in response or REPLACEMENT in response:
-      self.test_case.assertTrue(isinstance(response[PATCHED_CHECKSUM], int),
-                                "patched_checksum must be set. (2.3.4)")
+      self.test_case.assertTrue(
+          isinstance(response[PATCHED_CHECKSUM], int),
+          self.conform_message("conform-response-font-checksums",
+                               "patched_checksum must be set."))
       self.test_case.assertTrue(
           isinstance(response[ORIGINAL_FONT_CHECKSUM], int),
-          "original_font_checksum must be set. (2.3.4)")
+          self.conform_message("conform-response-font-checksums",
+                               "original_font_checksum must be set."))
 
     if CODEPOINT_ORDERING in response:
       self.integer_list_well_formed(response[CODEPOINT_ORDERING])
-      self.test_case.assertTrue(isinstance(response[ORDERING_CHECKSUM], int),
-                                "ordering_checksum must be set. (2.3.4)")
+      self.test_case.assertTrue(
+          isinstance(response[ORDERING_CHECKSUM], int),
+          self.conform_message("conform-response-ordering-checksum",
+                               "ordering_checksum must be set."))
 
     return self
 
   def font_has_at_least_codepoints(self, font, subset):
     # TODO(garretrieger): implement.
+    # covers: #conform-response-subset
     pass
 
   def decode_patch(self, base, patch, patch_format):
@@ -145,7 +168,11 @@ class ResponseChecker:
             subset_file.name
         ],
                                 check=True)
-        self.test_case.assertEqual(result.returncode, 0)
+        self.test_case.assertEqual(
+            result.returncode, 0,
+            self.conform_message(
+                "TODO-add-id(2.4.3)", f"Unable to decode patch, expected to be"
+                f"in format {patch_format}"))
         return subset_file.read()
     else:
       self.test_case.fail(f"Unsupported patch_format {patch_format}")
