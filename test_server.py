@@ -68,7 +68,7 @@ class ServerConformanceTest(unittest.TestCase):
   def test_minimal_request_post(self):
     response = self.request(self.font_path, data=ValidRequests.MINIMAL_REQUEST)
     (response.successful_response_checks().format_in(
-        {VCDIFF}).check_apply_patch_to(None, {0x41}))
+        {VCDIFF}).check_apply_patch_to(None, {0x41}).print_tested_ids())
 
 
 if __name__ == '__main__':
