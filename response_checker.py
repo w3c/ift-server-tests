@@ -35,6 +35,7 @@ class ResponseChecker:
   """Defines a set of common checks against a IFT server response."""
 
   def __init__(self, test_case, response):
+    """Constructor."""
     self.test_case = test_case
     self.status_code = response.status
     self.response_data = response.read()
