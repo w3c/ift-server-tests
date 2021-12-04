@@ -40,8 +40,14 @@ class ResponseChecker:
     self.response_data = response.read()
     self.response_obj = None
     self.url = response.url
+    self.tested_ids = set()
+
+  def print_tested_ids(self):
+    for tag in self.tested_ids:
+      print(f"tested conformance id: {tag}")
 
   def conform_message(self, tag, message):
+    self.tested_ids.add(tag)
     return (f"Failed requirement {spec_link(tag)}\n"
             f"  {message}\n"
             f"  Request URL: {self.url}")
@@ -87,6 +93,7 @@ class ResponseChecker:
 
     # TODO(garretrieger): test checksums
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
+    return self
 
   def response(self):
     """Returns the decoded cbor response object."""
