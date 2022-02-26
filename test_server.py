@@ -16,9 +16,11 @@ import unittest
 
 import urllib.request
 import sys
+
 from response_checker import VCDIFF
 from response_checker import ResponseChecker
 from sample_requests import ValidRequests
+import fast_hash
 
 
 def print_usage():
@@ -60,6 +62,17 @@ class ServerConformanceTest(unittest.TestCase):
         urllib.request.build_opener(IgnoreHttpErrors).open(req))
 
   ### Test Methods ###
+
+  def test_our_hash_matches_spec(self):
+    # Tests that our hash implementation matches the spec.
+    # Test cases from: https://w3c.github.io/IFT/Overview.html#computing-checksums
+    self.assertEqual(fast_hash.compute(bytes([0x0f, 0x7b, 0x5a, 0xe5])),
+                     0xe5e0d1dc89eaa189)
+    self.assertEqual(
+        fast_hash.compute(
+            bytes([
+                0x1d, 0xf4, 0x02, 0x5e, 0xd3, 0xb8, 0x43, 0x21, 0x3b, 0xae, 0xde
+            ])), 0xb31e9c70768205fb)
 
   # TODO(garretrieger): consider writing a parameterized tests against the set of all valid
   #                     requests. Plus individual tests as needed to check special cases.

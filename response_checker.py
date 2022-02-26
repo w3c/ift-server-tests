@@ -157,6 +157,7 @@ class ResponseChecker:
     return self
 
   def font_has_at_least_codepoints(self, font_data, subset):
+    """Checks that the font represented by font_data has at least the codepoints in set subset."""
     font = TTFont(io.BytesIO(font_data))
 
     cmap = font["cmap"]
@@ -167,11 +168,14 @@ class ResponseChecker:
 
       all_codepoints.update(table.cmap.keys())
 
-    self.test_case.assertTrue(subset.issubset(all_codepoints),
-                              self.conform_message("conform-response-subset",
-                                                   f"Subset produced by patch must contain at "
-                                                   f"least {subset}"))
+    self.test_case.assertTrue(
+        subset.issubset(all_codepoints),
+        self.conform_message(
+            "conform-response-subset",
+            f"Subset produced by patch must contain at "
+            f"least {subset}"))
 
+  # TODO(grieger): hash checking function.
 
   def decode_patch(self, base, patch, patch_format):
     """Attempts to apply patch to base. Returns decoded bytes."""
