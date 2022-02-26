@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 
 from cbor2 import loads
+import fast_hash
 from fontTools.ttLib import TTFont
 
 # PatchResponse Fields
@@ -93,8 +94,8 @@ class ResponseChecker:
 
     subset = self.decode_patch(base, patch, response[PATCH_FORMAT])
     self.font_has_at_least_codepoints(subset, min_codepoints)
+    self.patched_checksum_matches(subset, response[PATCHED_CHECKSUM])
 
-    # TODO(garretrieger): test checksums (TODO, what conformance statements?)
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
     return self
 
@@ -142,10 +143,12 @@ class ResponseChecker:
           isinstance(response[PATCHED_CHECKSUM], int),
           self.conform_message("conform-response-font-checksums",
                                "patched_checksum must be set."))
+      # TODO(garretrieger): check value of original font checksum?
       self.test_case.assertTrue(
           isinstance(response[ORIGINAL_FONT_CHECKSUM], int),
           self.conform_message("conform-response-font-checksums",
                                "original_font_checksum must be set."))
+
 
     if CODEPOINT_ORDERING in response:
       self.integer_list_well_formed(response[CODEPOINT_ORDERING])
@@ -155,6 +158,12 @@ class ResponseChecker:
                                "ordering_checksum must be set."))
 
     return self
+
+  def patched_checksum_matches(self, font_data, patched_checksum):
+    self.checksum_matches(font_data, patched_checksum,
+                          self.conform_message(
+                              "conform-response-patched-checksum",
+                              f"patched_checksum must be set to {fast_hash.compute(font_data)}"))
 
   def font_has_at_least_codepoints(self, font_data, subset):
     """Checks that the font represented by font_data has at least the codepoints in set subset."""
@@ -175,7 +184,8 @@ class ResponseChecker:
             f"Subset produced by patch must contain at "
             f"least {subset}"))
 
-  # TODO(grieger): hash checking function.
+  def checksum_matches(self, data, expected_checksum, failure_message):
+    self.test_case.assertEqual(fast_hash.compute(data), expected_checksum, failure_message)
 
   def decode_patch(self, base, patch, patch_format):
     """Attempts to apply patch to base. Returns decoded bytes."""
