@@ -1,6 +1,6 @@
 """
 Usage
-python3 check_coverage.py <path to spec html>
+python3 check_coverage.py <path to spec html> <tested ids file>
 """
 
 import sys
