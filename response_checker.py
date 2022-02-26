@@ -1,10 +1,12 @@
 """
 Helper for checking common cases on incremental font transfer server responses.
 """
+import io
 import subprocess
 import tempfile
 
 from cbor2 import loads
+from fontTools.ttLib import TTFont
 
 # PatchResponse Fields
 
@@ -92,7 +94,7 @@ class ResponseChecker:
     subset = self.decode_patch(base, patch, response[PATCH_FORMAT])
     self.font_has_at_least_codepoints(subset, min_codepoints)
 
-    # TODO(garretrieger): test checksums
+    # TODO(garretrieger): test checksums (TODO, what conformance statements?)
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
     return self
 
@@ -154,10 +156,22 @@ class ResponseChecker:
 
     return self
 
-  def font_has_at_least_codepoints(self, font, subset):
-    # TODO(garretrieger): implement.
-    # covers: #conform-response-subset
-    pass
+  def font_has_at_least_codepoints(self, font_data, subset):
+    font = TTFont(io.BytesIO(font_data))
+
+    cmap = font["cmap"]
+    all_codepoints = set()
+    for table in cmap.tables:
+      if not table.isUnicode():
+        continue
+
+      all_codepoints.update(table.cmap.keys())
+
+    self.test_case.assertTrue(subset.issubset(all_codepoints),
+                              self.conform_message("conform-response-subset",
+                                                   f"Subset produced by patch must contain at "
+                                                   f"least {subset}"))
+
 
   def decode_patch(self, base, patch, patch_format):
     """Attempts to apply patch to base. Returns decoded bytes."""
