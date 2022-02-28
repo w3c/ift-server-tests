@@ -24,7 +24,9 @@ import fast_hash
 
 
 def print_usage():
-  print("python3 test_server.py <server host> <request path> <original font file>")
+  print(
+      "python3 test_server.py <server host> <request path> <original font file>"
+  )
 
 
 class IgnoreHttpErrors(urllib.request.HTTPErrorProcessor):
@@ -82,7 +84,8 @@ class ServerConformanceTest(unittest.TestCase):
 
   # TODO(garretrieger): test for GET.
   def test_minimal_request_post(self):
-    response = self.request(self.request_path, data=ValidRequests.MINIMAL_REQUEST)
+    response = self.request(self.request_path,
+                            data=ValidRequests.MINIMAL_REQUEST)
     (response.successful_response_checks().format_in(
         {VCDIFF}).check_apply_patch_to(None, {0x41}).print_tested_ids())
 
@@ -98,6 +101,5 @@ if __name__ == '__main__':
   del sys.argv[2]
   server_address = sys.argv[1]
   del sys.argv[1]
-
 
   unittest.main()
