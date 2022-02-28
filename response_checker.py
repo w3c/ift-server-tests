@@ -37,7 +37,7 @@ def spec_link(tag):
 class ResponseChecker:
   """Defines a set of common checks against a IFT server response."""
 
-  def __init__(self, test_case, response):
+  def __init__(self, test_case, response, original_font_bytes):
     """Constructor."""
     self.test_case = test_case
     self.status_code = response.status
@@ -45,6 +45,7 @@ class ResponseChecker:
     self.response_obj = None
     self.url = response.url
     self.tested_ids = set()
+    self.original_font_bytes = original_font_bytes
 
   def print_tested_ids(self):
     for tag in self.tested_ids:
@@ -94,7 +95,7 @@ class ResponseChecker:
 
     subset = self.decode_patch(base, patch, response[PATCH_FORMAT])
     self.font_has_at_least_codepoints(subset, min_codepoints)
-    self.patched_checksum_matches(subset, response[PATCHED_CHECKSUM])
+    self.patched_checksum_matches(subset)
 
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
     return self
@@ -143,12 +144,12 @@ class ResponseChecker:
           isinstance(response[PATCHED_CHECKSUM], int),
           self.conform_message("conform-response-font-checksums",
                                "patched_checksum must be set."))
-      # TODO(garretrieger): check value of original font checksum? we'd need to have access
-      #                     to the original font's bytes.
       self.test_case.assertTrue(
           isinstance(response[ORIGINAL_FONT_CHECKSUM], int),
           self.conform_message("conform-response-font-checksums",
                                "original_font_checksum must be set."))
+
+      self.original_checksum_matches(self.original_font_bytes)
 
 
     if CODEPOINT_ORDERING in response:
@@ -160,11 +161,20 @@ class ResponseChecker:
 
     return self
 
-  def patched_checksum_matches(self, font_data, patched_checksum):
-    self.checksum_matches(font_data, patched_checksum,
+  def patched_checksum_matches(self, font_data):
+    response = self.response()
+    self.checksum_matches(font_data, response[PATCHED_CHECKSUM],
                           self.conform_message(
                               "conform-response-patched-checksum",
                               f"patched_checksum must be set to {fast_hash.compute(font_data)}"))
+
+  def original_checksum_matches(self, font_data):
+    response = self.response()
+    self.checksum_matches(font_data, response[ORIGINAL_FONT_CHECKSUM],
+                          self.conform_message(
+                              "conform-response-original-checksum",
+                              f"original_checksum must be set to {fast_hash.compute(font_data)}"))
+
 
   def font_has_at_least_codepoints(self, font_data, subset):
     """Checks that the font represented by font_data has at least the codepoints in set subset."""

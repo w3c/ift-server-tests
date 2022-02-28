@@ -43,7 +43,7 @@ class ServerConformanceTest(unittest.TestCase):
     self.server_address = server_address
     self.request_path = request_path
     with open(font_file_path, "rb") as font:
-      self.font_bytes = font.read()
+      self.original_font_bytes = font.read()
 
   def tearDown(self):
     pass
@@ -61,7 +61,8 @@ class ServerConformanceTest(unittest.TestCase):
                                  data=data)
     return ResponseChecker(
         self,
-        urllib.request.build_opener(IgnoreHttpErrors).open(req))
+        urllib.request.build_opener(IgnoreHttpErrors).open(req),
+        self.original_font_bytes)
 
   ### Test Methods ###
 
