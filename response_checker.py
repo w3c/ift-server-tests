@@ -219,7 +219,8 @@ class ResponseChecker:
         self.test_case.assertEqual(
             result.returncode, 0,
             self.conform_message(
-                "TODO-add-id(2.4.3)", f"Unable to decode patch, expected to be"
+                "conform-response-valid-patch",
+                f"Unable to decode patch, expected to be"
                 f"in format {patch_format}"))
         return subset_file.read()
     else:
