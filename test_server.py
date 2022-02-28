@@ -24,7 +24,7 @@ import fast_hash
 
 
 def print_usage():
-  print("python3 test_server.py <server address> <valid font path>")
+  print("python3 test_server.py <server host> <request path> <original font file>")
 
 
 class IgnoreHttpErrors(urllib.request.HTTPErrorProcessor):
@@ -41,7 +41,9 @@ class ServerConformanceTest(unittest.TestCase):
 
   def setUp(self):
     self.server_address = server_address
-    self.font_path = font_path
+    self.request_path = request_path
+    with open(font_file_path, "rb") as font:
+      self.font_bytes = font.read()
 
   def tearDown(self):
     pass
@@ -54,7 +56,7 @@ class ServerConformanceTest(unittest.TestCase):
       }
     else:
       headers = {}
-    req = urllib.request.Request(f"{self.server_address}{path}",
+    req = urllib.request.Request(f"https://{self.server_address}{path}",
                                  headers=headers,
                                  data=data)
     return ResponseChecker(
@@ -79,19 +81,22 @@ class ServerConformanceTest(unittest.TestCase):
 
   # TODO(garretrieger): test for GET.
   def test_minimal_request_post(self):
-    response = self.request(self.font_path, data=ValidRequests.MINIMAL_REQUEST)
+    response = self.request(self.request_path, data=ValidRequests.MINIMAL_REQUEST)
     (response.successful_response_checks().format_in(
         {VCDIFF}).check_apply_patch_to(None, {0x41}).print_tested_ids())
 
 
 if __name__ == '__main__':
-  if len(sys.argv) != 3:
+  if len(sys.argv) != 4:
     print_usage()
     sys.exit()
 
-  font_path = sys.argv[2]
+  font_file_path = sys.argv[3]
+  del sys.argv[3]
+  request_path = sys.argv[2]
   del sys.argv[2]
   server_address = sys.argv[1]
   del sys.argv[1]
+
 
   unittest.main()

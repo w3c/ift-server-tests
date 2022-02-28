@@ -143,7 +143,8 @@ class ResponseChecker:
           isinstance(response[PATCHED_CHECKSUM], int),
           self.conform_message("conform-response-font-checksums",
                                "patched_checksum must be set."))
-      # TODO(garretrieger): check value of original font checksum?
+      # TODO(garretrieger): check value of original font checksum? we'd need to have access
+      #                     to the original font's bytes.
       self.test_case.assertTrue(
           isinstance(response[ORIGINAL_FONT_CHECKSUM], int),
           self.conform_message("conform-response-font-checksums",
