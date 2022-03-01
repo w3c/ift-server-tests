@@ -111,16 +111,13 @@ class ServerConformanceTest(unittest.TestCase):
     base_codepoints = font_util.codepoints(base)
 
     # TODO(garretrieger): set codepoints have to the actual set returned in base.
-    # TODO(garretrieger): ordering checksum is optional in this context, but the server treats
-    #                     it as required. Removed this once server is fixed.
     # TODO(garretrieger): ensure we're getting a patch here. (warning check?)
     # TODO(garretrieger): server seems to be treating codepoints as indices. Fix server
-    ordering_checksum = init_response.ordering_checksum()
+    # ordering_checksum = init_response.ordering_checksum()
 
     patch_response = self.request(self.request_path,
                                   data=ValidRequests.MinimalPatchRequest(original_checksum,
-                                                                         base_checksum,
-                                                                         ordering_checksum))
+                                                                         base_checksum))
 
     patch_response.successful_response_checks()
     patch_response.format_in({VCDIFF})
