@@ -63,15 +63,17 @@ class ValidRequests:
 
 
   def MinimalPatchRequest(base_codepoints,
+                          new_codepoints,
                           original_checksum,
                           base_checksum,
                           ordering_checksum=None):
     have_set = ValidRequests.CompressedSet(base_codepoints)
+    needed_set = ValidRequests.CompressedSet(new_codepoints)
     obj = {
         PROTOCOL_VERSION: 0,
         ACCEPT_PATCH_FORMAT: [VCDIFF],
         CODEPOINTS_HAVE: have_set,
-        CODEPOINTS_NEEDED: COMPRESSED_SET_42,
+        CODEPOINTS_NEEDED: needed_set,
         ORIGINAL_FONT_CHECKSUM: original_checksum,
         BASE_CHECKSUM: base_checksum,
     }
