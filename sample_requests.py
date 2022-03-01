@@ -48,12 +48,15 @@ class ValidRequests:
 
 
   def MinimalPatchRequest(original_checksum, base_checksum, ordering_checksum=None):
-    return dumps({
+    obj = {
         PROTOCOL_VERSION: 0,
         ACCEPT_PATCH_FORMAT: [VCDIFF],
         CODEPOINTS_HAVE: COMPRESSED_SET_41,
         CODEPOINTS_NEEDED: COMPRESSED_SET_42,
         ORIGINAL_FONT_CHECKSUM: original_checksum,
         BASE_CHECKSUM: base_checksum,
-        ORDERING_CHECKSUM: ordering_checksum,
-    })
+    }
+    if ordering_checksum is not None:
+      obj[ORDERING_CHECKSUM] = ordering_checksum
+
+    return dumps(obj)
