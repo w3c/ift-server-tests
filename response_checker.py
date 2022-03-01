@@ -1,11 +1,13 @@
 """
 Helper for checking common cases on incremental font transfer server responses.
 """
+
 import io
 import subprocess
 import tempfile
 
 from cbor2 import loads
+import font_util
 from fontTools.ttLib import TTFont
 import fast_hash
 
@@ -98,7 +100,16 @@ class ResponseChecker:
     self.patched_checksum_matches(subset)
 
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
-    return self
+    return subset
+
+  def original_font_checksum(self):
+    response = self.response()
+    return response[ORIGINAL_FONT_CHECKSUM]
+
+  def ordering_checksum(self):
+    response = self.response()
+    return response[ORDERING_CHECKSUM]
+
 
   def response(self):
     """Returns the decoded cbor response object."""
@@ -128,6 +139,9 @@ class ResponseChecker:
         self.conform_message("conform-response-protocol-version",
                              "protocol_version must be set to 0."))
 
+    self.test_case.assertTrue(
+        PATCH_FORMAT in response,
+        self.conform_message("conform-response-valid-format", "patch_format must be set."))
     self.test_case.assertTrue(
         response[PATCH_FORMAT] in PATCH_FORMATS,
         self.conform_message(
@@ -180,20 +194,13 @@ class ResponseChecker:
     """Checks that the font represented by font_data has at least the codepoints in set subset."""
     font = TTFont(io.BytesIO(font_data))
 
-    cmap = font["cmap"]
-    all_codepoints = set()
-    for table in cmap.tables:
-      if not table.isUnicode():
-        continue
-
-      all_codepoints.update(table.cmap.keys())
-
+    all_codepoints = font_util.codepoints(font_data)
     self.test_case.assertTrue(
         subset.issubset(all_codepoints),
         self.conform_message(
             "conform-response-subset",
             f"Subset produced by patch must contain at "
-            f"least {subset}"))
+            f"least {subset}, but contains {all_codepoints}"))
 
   def checksum_matches(self, data, expected_checksum, failure_message):
     self.test_case.assertEqual(fast_hash.compute(data), expected_checksum,
