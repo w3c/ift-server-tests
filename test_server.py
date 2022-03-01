@@ -17,6 +17,7 @@ import unittest
 import urllib.request
 import sys
 
+from response_checker import PATCH
 from response_checker import VCDIFF
 from response_checker import ResponseChecker
 from sample_requests import ValidRequests
@@ -67,6 +68,12 @@ class ServerConformanceTest(unittest.TestCase):
         urllib.request.build_opener(IgnoreHttpErrors).open(req),
         self.original_font_bytes)
 
+  def next_available_codepoint(self, base_codepoints):
+    all_codepoints = font_util.codepoints(self.original_font_bytes)
+    for cp in sorted(all_codepoints.difference(base_codepoints)):
+      if cp > max(base_codepoints):
+        return cp
+
   ### Test Methods ###
 
   def test_our_hash_matches_spec(self):
@@ -109,19 +116,21 @@ class ServerConformanceTest(unittest.TestCase):
     base_checksum = fast_hash.compute(base)
     original_checksum = init_response.original_font_checksum()
     base_codepoints = font_util.codepoints(base)
-
-    # TODO(garretrieger): ensure we're getting a patch here. (warning check?)
-    # TODO(garretrieger): server seems to be treating codepoints as indices. Fix server
-    # ordering_checksum = init_response.ordering_checksum()
+    next_cp = self.next_available_codepoint(base_codepoints)
 
     patch_response = self.request(self.request_path,
                                   data=ValidRequests.MinimalPatchRequest(base_codepoints,
+                                                                         {next_cp},
                                                                          original_checksum,
                                                                          base_checksum))
 
+    if PATCH not in patch_response.response():
+      print("WARNING(test_minimal_patch_request_post): expected response to be a patch.")
+
+    base_codepoints.add(next_cp)
     patch_response.successful_response_checks()
     patch_response.format_in({VCDIFF})
-    patch_response.check_apply_patch_to(base, {0x41, 0x42})
+    patch_response.check_apply_patch_to(base, base_codepoints)
     patch_response.print_tested_ids()
 
 
