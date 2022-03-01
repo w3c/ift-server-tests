@@ -110,13 +110,13 @@ class ServerConformanceTest(unittest.TestCase):
     original_checksum = init_response.original_font_checksum()
     base_codepoints = font_util.codepoints(base)
 
-    # TODO(garretrieger): set codepoints have to the actual set returned in base.
     # TODO(garretrieger): ensure we're getting a patch here. (warning check?)
     # TODO(garretrieger): server seems to be treating codepoints as indices. Fix server
     # ordering_checksum = init_response.ordering_checksum()
 
     patch_response = self.request(self.request_path,
-                                  data=ValidRequests.MinimalPatchRequest(original_checksum,
+                                  data=ValidRequests.MinimalPatchRequest(base_codepoints,
+                                                                         original_checksum,
                                                                          base_checksum))
 
     patch_response.successful_response_checks()

@@ -47,11 +47,30 @@ class ValidRequests:
   })
 
 
-  def MinimalPatchRequest(original_checksum, base_checksum, ordering_checksum=None):
+  def CompressedSet(codepoints):
+    # Simplistic implementation that encodes each point as a single range.
+    last_cp = 0
+    deltas = []
+    for cp in sorted(codepoints):
+      delta = cp - last_cp
+      deltas.append(delta)
+      deltas.append(0)
+      last_cp = cp
+
+    return {
+        RANGE_DELTAS: bytes(deltas),
+    }
+
+
+  def MinimalPatchRequest(base_codepoints,
+                          original_checksum,
+                          base_checksum,
+                          ordering_checksum=None):
+    have_set = ValidRequests.CompressedSet(base_codepoints)
     obj = {
         PROTOCOL_VERSION: 0,
         ACCEPT_PATCH_FORMAT: [VCDIFF],
-        CODEPOINTS_HAVE: COMPRESSED_SET_41,
+        CODEPOINTS_HAVE: have_set,
         CODEPOINTS_NEEDED: COMPRESSED_SET_42,
         ORIGINAL_FONT_CHECKSUM: original_checksum,
         BASE_CHECKSUM: base_checksum,
