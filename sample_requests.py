@@ -24,7 +24,11 @@ SPARSE_BIT_SET = 0
 RANGE_DELTAS = 1
 
 COMPRESSED_SET_41 = {
-    RANGE_DELTAS: bytes([0X41, 0X00]),
+    RANGE_DELTAS: bytes([0x41, 0x00]),
+}
+
+COMPRESSED_SET_42 = {
+    RANGE_DELTAS: bytes([0x42, 0x00]),
 }
 
 # Patch Formats
@@ -41,3 +45,15 @@ class ValidRequests:
       ACCEPT_PATCH_FORMAT: [VCDIFF],
       CODEPOINTS_NEEDED: COMPRESSED_SET_41,
   })
+
+
+  def MinimalPatchRequest(original_checksum, base_checksum, ordering_checksum=None):
+    return dumps({
+        PROTOCOL_VERSION: 0,
+        ACCEPT_PATCH_FORMAT: [VCDIFF],
+        CODEPOINTS_HAVE: COMPRESSED_SET_41,
+        CODEPOINTS_NEEDED: COMPRESSED_SET_42,
+        ORIGINAL_FONT_CHECKSUM: original_checksum,
+        BASE_CHECKSUM: base_checksum,
+        ORDERING_CHECKSUM: ordering_checksum,
+    })

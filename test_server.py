@@ -21,6 +21,7 @@ from response_checker import VCDIFF
 from response_checker import ResponseChecker
 from sample_requests import ValidRequests
 import fast_hash
+import font_util
 
 
 def print_usage():
@@ -83,11 +84,48 @@ class ServerConformanceTest(unittest.TestCase):
   #                     requests. Plus individual tests as needed to check special cases.
 
   # TODO(garretrieger): test for GET.
+  # TODO(garretrieger): additional tests:
+  # - using GET.
+  # - patch request, using previously provided codepoint ordering.
+  # - patch request, mixing indices and codepoints.
+  # - patch request, not using previously providing codepoint ordering.
+  # - patch request, with invalid codepoint ordering.
+  # - patch request, bad original font checksum
+  # - patch request, bad base checksum
   def test_minimal_request_post(self):
     response = self.request(self.request_path,
                             data=ValidRequests.MINIMAL_REQUEST)
-    (response.successful_response_checks().format_in(
-        {VCDIFF}).check_apply_patch_to(None, {0x41}).print_tested_ids())
+
+
+    response.successful_response_checks()
+    response.format_in({VCDIFF})
+    response.check_apply_patch_to(None, {0x41})
+    response.print_tested_ids()
+
+  def test_minimal_patch_request_post(self):
+    init_response = self.request(self.request_path,
+                                 data=ValidRequests.MINIMAL_REQUEST)
+    base = init_response.check_apply_patch_to(None, {0x41})
+    base_checksum = fast_hash.compute(base)
+    original_checksum = init_response.original_font_checksum()
+    base_codepoints = font_util.codepoints(base)
+
+    # TODO(garretrieger): set codepoints have to the actual set returned in base.
+    # TODO(garretrieger): ordering checksum is optional in this context, but the server treats
+    #                     it as required. Removed this once server is fixed.
+    # TODO(garretrieger): ensure we're getting a patch here. (warning check?)
+    # TODO(garretrieger): server seems to be treating codepoints as indices. Fix server
+    ordering_checksum = init_response.ordering_checksum()
+
+    patch_response = self.request(self.request_path,
+                                  data=ValidRequests.MinimalPatchRequest(original_checksum,
+                                                                         base_checksum,
+                                                                         ordering_checksum))
+
+    patch_response.successful_response_checks()
+    patch_response.format_in({VCDIFF})
+    patch_response.check_apply_patch_to(base, {0x41, 0x42})
+    patch_response.print_tested_ids()
 
 
 if __name__ == '__main__':
