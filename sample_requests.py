@@ -39,6 +39,7 @@ BROTLI = 1
 
 
 class ValidRequests:
+  """Helper that holds sample requests, and methods to produce them."""
 
   MINIMAL_REQUEST = dumps({
       PROTOCOL_VERSION: 0,
@@ -46,27 +47,31 @@ class ValidRequests:
       CODEPOINTS_NEEDED: COMPRESSED_SET_41,
   })
 
-  def CompressedSet(codepoints):
+  # pylint: disable=no-self-argument
+  def compressed_set(codepoints):
+    """Returns a compressed set containing the given codepoints."""
     # Simplistic implementation that encodes each point as a single range.
     last_cp = 0
     deltas = []
-    for cp in sorted(codepoints):
-      delta = cp - last_cp
+    for codepoint in sorted(codepoints):
+      delta = codepoint - last_cp
       deltas.append(delta)
       deltas.append(0)
-      last_cp = cp
+      last_cp = codepoint
 
     return {
         RANGE_DELTAS: bytes(deltas),
     }
 
-  def MinimalPatchRequest(base_codepoints,
-                          new_codepoints,
-                          original_checksum,
-                          base_checksum,
-                          ordering_checksum=None):
-    have_set = ValidRequests.CompressedSet(base_codepoints)
-    needed_set = ValidRequests.CompressedSet(new_codepoints)
+  # pylint: disable=no-self-argument
+  def minimal_patch_request(base_codepoints,
+                            new_codepoints,
+                            original_checksum,
+                            base_checksum,
+                            ordering_checksum=None):
+    """Returns a basic patch request with the given parameters."""
+    have_set = ValidRequests.compressed_set(base_codepoints)
+    needed_set = ValidRequests.compressed_set(new_codepoints)
     obj = {
         PROTOCOL_VERSION: 0,
         ACCEPT_PATCH_FORMAT: [VCDIFF],

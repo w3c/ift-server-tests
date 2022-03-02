@@ -81,10 +81,12 @@ class ServerConformanceTest(unittest.TestCase):
         self.original_font_bytes)
 
   def next_available_codepoint(self, base_codepoints):
+    """Finds a codepoint that's in the original font, but not in base_codepoints."""
     all_codepoints = font_util.codepoints(self.original_font_bytes)
-    for cp in sorted(all_codepoints.difference(base_codepoints)):
-      if cp > max(base_codepoints):
-        return cp
+    for codepoint in sorted(all_codepoints.difference(base_codepoints)):
+      if codepoint > max(base_codepoints):
+        return codepoint
+    raise AssertionError("No codepoint is available to request.")
 
   ### Test Methods ###
 
@@ -102,9 +104,7 @@ class ServerConformanceTest(unittest.TestCase):
   # TODO(garretrieger): consider writing a parameterized tests against the set of all valid
   #                     requests. Plus individual tests as needed to check special cases.
 
-  # TODO(garretrieger): test for GET.
   # TODO(garretrieger): additional tests:
-  # - using GET.
   # - patch request, using previously provided codepoint ordering.
   # - patch request, mixing indices and codepoints.
   # - patch request, not using previously providing codepoint ordering.
@@ -138,7 +138,7 @@ class ServerConformanceTest(unittest.TestCase):
 
         patch_response = self.request(self.request_path,
                                       method=method,
-                                      data=ValidRequests.MinimalPatchRequest(
+                                      data=ValidRequests.minimal_patch_request(
                                           base_codepoints, {next_cp},
                                           original_checksum, base_checksum))
 

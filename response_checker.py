@@ -2,13 +2,11 @@
 Helper for checking common cases on incremental font transfer server responses.
 """
 
-import io
 import subprocess
 import tempfile
 
 from cbor2 import loads
 import font_util
-from fontTools.ttLib import TTFont
 import fast_hash
 
 # PatchResponse Fields
@@ -192,8 +190,6 @@ class ResponseChecker:
 
   def font_has_at_least_codepoints(self, font_data, subset):
     """Checks that the font represented by font_data has at least the codepoints in set subset."""
-    font = TTFont(io.BytesIO(font_data))
-
     all_codepoints = font_util.codepoints(font_data)
     self.test_case.assertTrue(
         subset.issubset(all_codepoints),
