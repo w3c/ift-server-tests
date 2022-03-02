@@ -17,6 +17,7 @@ import unittest
 import urllib.request
 import sys
 
+from base64 import urlsafe_b64encode
 from response_checker import PATCH
 from response_checker import VCDIFF
 from response_checker import ResponseChecker
@@ -43,6 +44,8 @@ class IgnoreHttpErrors(urllib.request.HTTPErrorProcessor):
 class ServerConformanceTest(unittest.TestCase):
   """Patch Subset Server conformance test."""
 
+  METHODS = ["GET", "POST"]
+
   def setUp(self):
     self.server_address = server_address
     self.request_path = request_path
@@ -52,17 +55,26 @@ class ServerConformanceTest(unittest.TestCase):
   def tearDown(self):
     pass
 
-  def request(self, path, data):
+  def request(self, path, data, method="POST"):
     """Send a HTTP request to path."""
-    if data is not None:
+    is_post = (method == "POST")
+    if is_post:
       headers = {
           "Content-Type": "application/binary",
       }
     else:
       headers = {}
-    req = urllib.request.Request(f"https://{self.server_address}{path}",
-                                 headers=headers,
-                                 data=data)
+
+    if is_post:
+      req = urllib.request.Request(f"https://{self.server_address}{path}",
+                                   headers=headers,
+                                   data=data)
+    else:
+      base64_data = urlsafe_b64encode(data).decode("utf-8")
+      req = urllib.request.Request(
+          f"https://{self.server_address}{path}?request={base64_data}",
+          headers=headers)
+
     return ResponseChecker(
         self,
         urllib.request.build_opener(IgnoreHttpErrors).open(req),
@@ -99,39 +111,47 @@ class ServerConformanceTest(unittest.TestCase):
   # - patch request, with invalid codepoint ordering.
   # - patch request, bad original font checksum
   # - patch request, bad base checksum
-  def test_minimal_request_post(self):
-    response = self.request(self.request_path,
-                            data=ValidRequests.MINIMAL_REQUEST)
+  def test_minimal_request(self):
+    for method in ServerConformanceTest.METHODS:
+      with self.subTest(msg=f"{method} request."):
+        response = self.request(self.request_path,
+                                data=ValidRequests.MINIMAL_REQUEST,
+                                method=method)
 
-
-    response.successful_response_checks()
-    response.format_in({VCDIFF})
-    response.check_apply_patch_to(None, {0x41})
-    response.print_tested_ids()
+        response.successful_response_checks()
+        response.format_in({VCDIFF})
+        response.check_apply_patch_to(None, {0x41})
+        response.print_tested_ids()
 
   def test_minimal_patch_request_post(self):
-    init_response = self.request(self.request_path,
-                                 data=ValidRequests.MINIMAL_REQUEST)
-    base = init_response.check_apply_patch_to(None, {0x41})
-    base_checksum = fast_hash.compute(base)
-    original_checksum = init_response.original_font_checksum()
-    base_codepoints = font_util.codepoints(base)
-    next_cp = self.next_available_codepoint(base_codepoints)
+    for method in ServerConformanceTest.METHODS:
+      with self.subTest(msg=f"{method} request."):
 
-    patch_response = self.request(self.request_path,
-                                  data=ValidRequests.MinimalPatchRequest(base_codepoints,
-                                                                         {next_cp},
-                                                                         original_checksum,
-                                                                         base_checksum))
+        init_response = self.request(self.request_path,
+                                     method=method,
+                                     data=ValidRequests.MINIMAL_REQUEST)
+        base = init_response.check_apply_patch_to(None, {0x41})
+        base_checksum = fast_hash.compute(base)
+        original_checksum = init_response.original_font_checksum()
+        base_codepoints = font_util.codepoints(base)
+        next_cp = self.next_available_codepoint(base_codepoints)
 
-    if PATCH not in patch_response.response():
-      print("WARNING(test_minimal_patch_request_post): expected response to be a patch.")
+        patch_response = self.request(self.request_path,
+                                      method=method,
+                                      data=ValidRequests.MinimalPatchRequest(
+                                          base_codepoints, {next_cp},
+                                          original_checksum, base_checksum))
 
-    base_codepoints.add(next_cp)
-    patch_response.successful_response_checks()
-    patch_response.format_in({VCDIFF})
-    patch_response.check_apply_patch_to(base, base_codepoints)
-    patch_response.print_tested_ids()
+        if PATCH not in patch_response.response():
+          print(
+              "WARNING(test_minimal_patch_request_post): expected response to be a patch."
+          )
+
+        base_codepoints.add(next_cp)
+        patch_response.successful_response_checks()
+        patch_response.format_in({VCDIFF})
+        patch_response.check_apply_patch_to(base, base_codepoints)
+        patch_response.print_tested_ids()
 
 
 if __name__ == '__main__':

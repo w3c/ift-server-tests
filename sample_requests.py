@@ -46,7 +46,6 @@ class ValidRequests:
       CODEPOINTS_NEEDED: COMPRESSED_SET_41,
   })
 
-
   def CompressedSet(codepoints):
     # Simplistic implementation that encodes each point as a single range.
     last_cp = 0
@@ -60,7 +59,6 @@ class ValidRequests:
     return {
         RANGE_DELTAS: bytes(deltas),
     }
-
 
   def MinimalPatchRequest(base_codepoints,
                           new_codepoints,

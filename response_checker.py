@@ -110,7 +110,6 @@ class ResponseChecker:
     response = self.response()
     return response[ORDERING_CHECKSUM]
 
-
   def response(self):
     """Returns the decoded cbor response object."""
     if self.response_obj is None:
@@ -141,7 +140,8 @@ class ResponseChecker:
 
     self.test_case.assertTrue(
         PATCH_FORMAT in response,
-        self.conform_message("conform-response-valid-format", "patch_format must be set."))
+        self.conform_message("conform-response-valid-format",
+                             "patch_format must be set."))
     self.test_case.assertTrue(
         response[PATCH_FORMAT] in PATCH_FORMATS,
         self.conform_message(
