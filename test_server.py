@@ -84,7 +84,7 @@ class ServerConformanceTest(unittest.TestCase):
     """Finds a codepoint that's in the original font, but not in base_codepoints."""
     all_codepoints = font_util.codepoints(self.original_font_bytes)
     for codepoint in sorted(all_codepoints.difference(base_codepoints)):
-      if codepoint > max(base_codepoints):
+      if codepoint >= 0x30:
         return codepoint
     raise AssertionError("No codepoint is available to request.")
 
@@ -111,6 +111,7 @@ class ServerConformanceTest(unittest.TestCase):
   # - patch request, with invalid codepoint ordering.
   # - patch request, bad original font checksum
   # - patch request, bad base checksum
+  # - requests which uses sparse bit sets
   def test_minimal_request(self):
     for method in ServerConformanceTest.METHODS:
       with self.subTest(msg=f"{method} request."):
@@ -119,11 +120,12 @@ class ServerConformanceTest(unittest.TestCase):
                                 method=method)
 
         response.successful_response_checks()
+        response.assert_has_codepoint_mapping()
         response.format_in({VCDIFF})
         response.check_apply_patch_to(None, {0x41})
         response.print_tested_ids()
 
-  def test_minimal_patch_request_post(self):
+  def test_minimal_patch_request(self):
     for method in ServerConformanceTest.METHODS:
       with self.subTest(msg=f"{method} request."):
 
