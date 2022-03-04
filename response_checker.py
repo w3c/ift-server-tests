@@ -108,6 +108,18 @@ class ResponseChecker:
     response = self.response()
     return response[ORDERING_CHECKSUM]
 
+  def assert_has_codepoint_mapping(self):
+    self.test_case.assertTrue(CODEPOINT_ORDERING in self.response(),
+                              self.conform_message("conform-response-codepoint-ordering",
+                                                   "codepoint_ordering must be set."))
+    return self
+
+  def codepoint_mapping(self):
+    self.assert_has_codepoint_mapping()
+
+    # TODO(griegr): decode the int list.
+    return {}
+
   def response(self):
     """Returns the decoded cbor response object."""
     if self.response_obj is None:
