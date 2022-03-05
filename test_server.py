@@ -122,7 +122,7 @@ class ServerConformanceTest(unittest.TestCase):
         response.successful_response_checks()
         response.assert_has_codepoint_mapping()
         response.format_in({VCDIFF})
-        response.check_apply_patch_to(None, {0x41})
+        response.check_apply_patch_to({0x41})
         response.print_tested_ids()
 
   def test_minimal_patch_request(self):
@@ -132,17 +132,16 @@ class ServerConformanceTest(unittest.TestCase):
         init_response = self.request(self.request_path,
                                      method=method,
                                      data=ValidRequests.MINIMAL_REQUEST)
-        base = init_response.check_apply_patch_to(None, {0x41})
-        base_checksum = fast_hash.compute(base)
-        original_checksum = init_response.original_font_checksum()
-        base_codepoints = font_util.codepoints(base)
-        next_cp = self.next_available_codepoint(base_codepoints)
 
-        patch_response = self.request(self.request_path,
-                                      method=method,
-                                      data=ValidRequests.minimal_patch_request(
-                                          base_codepoints, {next_cp},
-                                          original_checksum, base_checksum))
+        # TODO(grieger): add helper 'extend' method to response checker, that creates
+        #                a new response checker.
+        # TODO(grieger): base codepoints helper function in response checker.
+
+        base_codepoints = init_response.codepoints_in_response()
+        next_cp = self.next_available_codepoint(base_codepoints)
+        request_generator = lambda data: self.request(self.request_path, method=method, data=data)
+        patch_response = init_response.extend(request_generator,
+                                              {next_cp})
 
         if PATCH not in patch_response.response():
           print(
@@ -152,7 +151,7 @@ class ServerConformanceTest(unittest.TestCase):
         base_codepoints.add(next_cp)
         patch_response.successful_response_checks()
         patch_response.format_in({VCDIFF})
-        patch_response.check_apply_patch_to(base, base_codepoints)
+        patch_response.check_apply_patch_to(base_codepoints)
         patch_response.print_tested_ids()
 
 
