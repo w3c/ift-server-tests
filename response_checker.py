@@ -8,6 +8,7 @@ import tempfile
 from cbor2 import loads
 import font_util
 import fast_hash
+from sample_requests import ValidRequests
 
 # PatchResponse Fields
 
@@ -46,6 +47,7 @@ class ResponseChecker:
     self.url = response.url
     self.tested_ids = set()
     self.original_font_bytes = original_font_bytes
+    self.base = bytes([])
 
   def print_tested_ids(self):
     for tag in self.tested_ids:
@@ -83,10 +85,11 @@ class ResponseChecker:
             f"one of {patch_formats}"))
     return self
 
-  def check_apply_patch_to(self, base, min_codepoints):
+  def check_apply_patch_to(self, min_codepoints):
     """Checks that this response can be applied to base and covers at least min_codepoints."""
     response = self.response()
 
+    base = self.base
     if REPLACEMENT in response:
       base = bytes([])
       patch = response[REPLACEMENT]
@@ -99,6 +102,26 @@ class ResponseChecker:
 
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
     return subset
+
+  def extend(self, requester, new_codepoints, codepoint_map=None):
+    """Make a second request that extends the font fetched by this one."""
+    # TODO(garretrieger): apply codepoint map if provided.
+    base = self.check_apply_patch_to(set())
+    base_checksum = fast_hash.compute(base)
+    original_checksum = self.original_font_checksum()
+    base_codepoints = self.codepoints_in_response()
+
+    request_cbor = ValidRequests.minimal_patch_request(
+        base_codepoints, new_codepoints,
+        original_checksum, base_checksum)
+
+    response = requester(request_cbor)
+    response.base = base
+    return response
+
+  def codepoints_in_response(self):
+    base = self.check_apply_patch_to(set())
+    return font_util.codepoints(base)
 
   def original_font_checksum(self):
     response = self.response()
