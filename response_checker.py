@@ -105,15 +105,19 @@ class ResponseChecker:
 
   def extend(self, requester, new_codepoints, codepoint_map=None):
     """Make a second request that extends the font fetched by this one."""
-    # TODO(garretrieger): apply codepoint map if provided.
     base = self.check_apply_patch_to(set())
     base_checksum = fast_hash.compute(base)
     original_checksum = self.original_font_checksum()
     base_codepoints = self.codepoints_in_response()
+    ordering_checksum = self.ordering_checksum() if codepoint_map is not None else None
+
+    if codepoint_map:
+      base_codepoints = {codepoint_map[cp] for cp in base_codepoints}
+      new_codepoints = {codepoint_map[cp] for cp in new_codepoints}
 
     request_cbor = ValidRequests.minimal_patch_request(
         base_codepoints, new_codepoints,
-        original_checksum, base_checksum)
+        original_checksum, base_checksum, ordering_checksum)
 
     response = requester(request_cbor)
     response.base = base
@@ -139,8 +143,7 @@ class ResponseChecker:
 
   def codepoint_mapping(self):
     self.assert_has_codepoint_mapping()
-
-    # TODO(griegr): decode the int list.
+    # TODO(garretrieger): decode the int list.
     return {}
 
   def response(self):
@@ -200,6 +203,7 @@ class ResponseChecker:
 
     if CODEPOINT_ORDERING in response:
       self.integer_list_well_formed(response[CODEPOINT_ORDERING])
+      # TODO(garretrieger): is their a requirement to check the ordering checksum?
       self.test_case.assertTrue(
           isinstance(response[ORDERING_CHECKSUM], int),
           self.conform_message("conform-response-ordering-checksum",

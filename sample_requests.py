@@ -75,12 +75,16 @@ class ValidRequests:
     obj = {
         PROTOCOL_VERSION: 0,
         ACCEPT_PATCH_FORMAT: [VCDIFF],
-        CODEPOINTS_HAVE: have_set,
-        CODEPOINTS_NEEDED: needed_set,
         ORIGINAL_FONT_CHECKSUM: original_checksum,
         BASE_CHECKSUM: base_checksum,
     }
     if ordering_checksum is not None:
       obj[ORDERING_CHECKSUM] = ordering_checksum
+      obj[INDICES_HAVE] = have_set
+      obj[INDICES_NEEDED] = needed_set
+    else:
+      obj[CODEPOINTS_HAVE] = have_set
+      obj[CODEPOINTS_NEEDED] = needed_set
+
 
     return dumps(obj)
