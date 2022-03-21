@@ -127,32 +127,31 @@ class ServerConformanceTest(unittest.TestCase):
 
   def test_minimal_patch_request(self):
     for method in ServerConformanceTest.METHODS:
-      with self.subTest(msg=f"{method} request."):
+      for remap_codepoints in {False, True}:
+        with self.subTest(msg=f"{method} request."):
 
-        init_response = self.request(self.request_path,
-                                     method=method,
-                                     data=ValidRequests.MINIMAL_REQUEST)
+          init_response = self.request(self.request_path,
+                                       method=method,
+                                       data=ValidRequests.MINIMAL_REQUEST)
 
-        # TODO(grieger): add helper 'extend' method to response checker, that creates
-        #                a new response checker.
-        # TODO(grieger): base codepoints helper function in response checker.
+          codepoint_map = init_response.codepoint_mapping() if remap_codepoints else None
+          base_codepoints = init_response.codepoints_in_response()
+          next_cp = self.next_available_codepoint(base_codepoints)
+          request_generator = lambda data: self.request(self.request_path, method=method, data=data)
+          patch_response = init_response.extend(request_generator,
+                                                {next_cp},
+                                                codepoint_map=codepoint_map)
 
-        base_codepoints = init_response.codepoints_in_response()
-        next_cp = self.next_available_codepoint(base_codepoints)
-        request_generator = lambda data: self.request(self.request_path, method=method, data=data)
-        patch_response = init_response.extend(request_generator,
-                                              {next_cp})
+          if PATCH not in patch_response.response():
+            print(
+                "WARNING(test_minimal_patch_request_post): expected response to be a patch."
+            )
 
-        if PATCH not in patch_response.response():
-          print(
-              "WARNING(test_minimal_patch_request_post): expected response to be a patch."
-          )
-
-        base_codepoints.add(next_cp)
-        patch_response.successful_response_checks()
-        patch_response.format_in({VCDIFF})
-        patch_response.check_apply_patch_to(base_codepoints)
-        patch_response.print_tested_ids()
+          base_codepoints.add(next_cp)
+          patch_response.successful_response_checks()
+          patch_response.format_in({VCDIFF})
+          patch_response.check_apply_patch_to(base_codepoints)
+          patch_response.print_tested_ids()
 
 
 if __name__ == '__main__':
