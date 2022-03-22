@@ -18,12 +18,14 @@ import urllib.request
 import sys
 
 from base64 import urlsafe_b64encode
+from conformance_exception import ConformanceException
 from response_checker import PATCH
 from response_checker import VCDIFF
 from response_checker import ResponseChecker
 from sample_requests import ValidRequests
 import fast_hash
 import font_util
+import integer_list
 
 
 def print_usage():
@@ -89,6 +91,16 @@ class ServerConformanceTest(unittest.TestCase):
     raise AssertionError("No codepoint is available to request.")
 
   ### Test Methods ###
+
+  def test_integer_list_decode_matches_spec(self):
+    # Tests that our integer list decode implementation matches the spec.
+    values = integer_list.decode(bytes([0x2E, 0x28, 0x3D, 0x11, 0x81, 0x00, 0x02, 0x02, 0x81, 0x09]))
+    self.assertEqual(values,
+                     [23, 43, 12, 3, 67, 68, 69, 0])
+
+    self.assertRaises(ConformanceException, integer_list.decode, bytes([0x80, 0x01]))
+    self.assertRaises(ConformanceException, integer_list.decode, bytes([0x81, 0x80, 0x80, 0x80, 0x80, 0x00]))
+    self.assertRaises(ConformanceException, integer_list.decode, bytes([0xFF, 0xFF, 0xFF, 0xFF, 0x01]))
 
   def test_our_hash_matches_spec(self):
     # Tests that our hash implementation matches the spec.
