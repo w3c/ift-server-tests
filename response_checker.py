@@ -9,6 +9,8 @@ from cbor2 import loads
 import font_util
 import fast_hash
 from sample_requests import ValidRequests
+import integer_list
+from conformance_exception import ConformanceException
 
 # PatchResponse Fields
 
@@ -143,9 +145,16 @@ class ResponseChecker:
 
   def codepoint_mapping(self):
     self.assert_has_codepoint_mapping()
-    # TODO(garretrieger): decode the int list.
-    # TODO(garretrieger): assert conform-uintbase128-illegal check (for exception raised by decoding).
-    return {}
+    response = self.response()
+    try:
+      mapping_list = integer_list.decode(response[CODEPOINT_ORDERING])
+    except ConformanceException as err:
+      self.test_case.assertTrue(False,
+                                self.conform_message(err.conformance_id,
+                                                     f"Conformance error decoding "
+                                                     f"codepoint_ordering: {err}"))
+
+    return {cp : idx for idx, cp in enumerate(mapping_list)}
 
   def response(self):
     """Returns the decoded cbor response object."""
@@ -159,8 +168,14 @@ class ResponseChecker:
     return self.response_obj
 
   def integer_list_well_formed(self, int_list):
-    # TODO(garretrieger): check for requirements in 2.2.5
-    pass
+    try:
+      response = self.response()
+      integer_list.decode(response[CODEPOINT_ORDERING])
+    except ConformanceException as err:
+      self.test_case.assertTrue(False,
+                                self.conform_message(err.conformance_id,
+                                                     f"Conformance error decoding "
+                                                     f"codepoint_ordering: {err}"))
 
   def response_well_formed(self):
     """Checks the CBOR response object is well formed according to the spec."""
