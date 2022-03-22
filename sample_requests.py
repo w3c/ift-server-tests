@@ -88,5 +88,4 @@ class ValidRequests:
       obj[CODEPOINTS_HAVE] = have_set
       obj[CODEPOINTS_NEEDED] = needed_set
 
-
     return dumps(obj)

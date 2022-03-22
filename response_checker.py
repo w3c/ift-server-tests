@@ -40,6 +40,7 @@ def spec_link(tag):
 class ResponseChecker:
   """Defines a set of common checks against a IFT server response."""
 
+  # pylint: disable=too-many-instance-attributes
   def __init__(self, test_case, response, original_font_bytes):
     """Constructor."""
     self.test_case = test_case
@@ -111,15 +112,18 @@ class ResponseChecker:
     base_checksum = fast_hash.compute(base)
     original_checksum = self.original_font_checksum()
     base_codepoints = self.codepoints_in_response()
-    ordering_checksum = self.ordering_checksum() if codepoint_map is not None else None
+    ordering_checksum = self.ordering_checksum(
+    ) if codepoint_map is not None else None
 
     if codepoint_map:
       base_codepoints = {codepoint_map[cp] for cp in base_codepoints}
       new_codepoints = {codepoint_map[cp] for cp in new_codepoints}
 
-    request_cbor = ValidRequests.minimal_patch_request(
-        base_codepoints, new_codepoints,
-        original_checksum, base_checksum, ordering_checksum)
+    request_cbor = ValidRequests.minimal_patch_request(base_codepoints,
+                                                       new_codepoints,
+                                                       original_checksum,
+                                                       base_checksum,
+                                                       ordering_checksum)
 
     response = requester(request_cbor)
     response.base = base
@@ -138,23 +142,27 @@ class ResponseChecker:
     return response[ORDERING_CHECKSUM]
 
   def assert_has_codepoint_mapping(self):
-    self.test_case.assertTrue(CODEPOINT_ORDERING in self.response(),
-                              self.conform_message("conform-response-codepoint-ordering",
-                                                   "codepoint_ordering must be set."))
+    """Tests if the response contains a codepoint mapping."""
+    self.test_case.assertTrue(
+        CODEPOINT_ORDERING in self.response(),
+        self.conform_message("conform-response-codepoint-ordering",
+                             "codepoint_ordering must be set."))
     return self
 
   def codepoint_mapping(self):
+    """Decodes and returns the codepoint mapping in the response."""
     self.assert_has_codepoint_mapping()
     response = self.response()
     try:
       mapping_list = integer_list.decode(response[CODEPOINT_ORDERING])
     except ConformanceException as err:
-      self.test_case.assertTrue(False,
-                                self.conform_message(err.conformance_id,
-                                                     f"Conformance error decoding "
-                                                     f"codepoint_ordering: {err}"))
+      self.test_case.assertTrue(
+          False,
+          self.conform_message(
+              err.conformance_id, f"Conformance error decoding "
+              f"codepoint_ordering: {err}"))
 
-    return {cp : idx for idx, cp in enumerate(mapping_list)}
+    return {cp: idx for idx, cp in enumerate(mapping_list)}
 
   def response(self):
     """Returns the decoded cbor response object."""
@@ -168,14 +176,16 @@ class ResponseChecker:
     return self.response_obj
 
   def integer_list_well_formed(self, int_list):
+    """Attempts to decode the int_list to see if it's well formed."""
     try:
-      response = self.response()
-      integer_list.decode(response[CODEPOINT_ORDERING])
+      integer_list.decode(int_list)
     except ConformanceException as err:
-      self.test_case.assertTrue(False,
-                                self.conform_message(err.conformance_id,
-                                                     f"Conformance error decoding "
-                                                     f"codepoint_ordering: {err}"))
+      # TODO(garretrieger): always do assert so the conformance id test is recorded.
+      self.test_case.assertTrue(
+          False,
+          self.conform_message(
+              err.conformance_id, f"Conformance error decoding "
+              f"codepoint_ordering: {err}"))
 
   def response_well_formed(self):
     """Checks the CBOR response object is well formed according to the spec."""
