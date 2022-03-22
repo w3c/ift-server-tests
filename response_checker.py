@@ -144,6 +144,7 @@ class ResponseChecker:
   def codepoint_mapping(self):
     self.assert_has_codepoint_mapping()
     # TODO(garretrieger): decode the int list.
+    # TODO(garretrieger): assert conform-uintbase128-illegal check (for exception raised by decoding).
     return {}
 
   def response(self):

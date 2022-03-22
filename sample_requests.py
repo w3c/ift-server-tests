@@ -51,6 +51,8 @@ class ValidRequests:
   def compressed_set(codepoints):
     """Returns a compressed set containing the given codepoints."""
     # Simplistic implementation that encodes each point as a single range.
+    #
+    # TODO(garretrieger): support for UIntBase128 encoding.
     last_cp = 0
     deltas = []
     for codepoint in sorted(codepoints):
