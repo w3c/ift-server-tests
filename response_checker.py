@@ -177,15 +177,17 @@ class ResponseChecker:
 
   def integer_list_well_formed(self, int_list):
     """Attempts to decode the int_list to see if it's well formed."""
+    maybe_err = None
     try:
       integer_list.decode(int_list)
     except ConformanceException as err:
-      # TODO(garretrieger): always do assert so the conformance id test is recorded.
-      self.test_case.assertTrue(
-          False,
-          self.conform_message(
-              err.conformance_id, f"Conformance error decoding "
-              f"codepoint_ordering: {err}"))
+      maybe_err = err
+
+    self.test_case.assertTrue(
+        maybe_err is None,
+        self.conform_message(
+            "conform-uintbase128-illegal", f"Conformance error decoding "
+            f"codepoint_ordering: {maybe_err}"))
 
   def response_well_formed(self):
     """Checks the CBOR response object is well formed according to the spec."""
