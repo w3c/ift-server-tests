@@ -94,13 +94,16 @@ class ServerConformanceTest(unittest.TestCase):
 
   def test_integer_list_decode_matches_spec(self):
     # Tests that our integer list decode implementation matches the spec.
-    values = integer_list.decode(bytes([0x2E, 0x28, 0x3D, 0x11, 0x81, 0x00, 0x02, 0x02, 0x81, 0x09]))
-    self.assertEqual(values,
-                     [23, 43, 12, 3, 67, 68, 69, 0])
+    values = integer_list.decode(
+        bytes([0x2E, 0x28, 0x3D, 0x11, 0x81, 0x00, 0x02, 0x02, 0x81, 0x09]))
+    self.assertEqual(values, [23, 43, 12, 3, 67, 68, 69, 0])
 
-    self.assertRaises(ConformanceException, integer_list.decode, bytes([0x80, 0x01]))
-    self.assertRaises(ConformanceException, integer_list.decode, bytes([0x81, 0x80, 0x80, 0x80, 0x80, 0x00]))
-    self.assertRaises(ConformanceException, integer_list.decode, bytes([0xFF, 0xFF, 0xFF, 0xFF, 0x01]))
+    self.assertRaises(ConformanceException, integer_list.decode,
+                      bytes([0x80, 0x01]))
+    self.assertRaises(ConformanceException, integer_list.decode,
+                      bytes([0x81, 0x80, 0x80, 0x80, 0x80, 0x00]))
+    self.assertRaises(ConformanceException, integer_list.decode,
+                      bytes([0xFF, 0xFF, 0xFF, 0xFF, 0x01]))
 
   def test_our_hash_matches_spec(self):
     # Tests that our hash implementation matches the spec.
@@ -139,19 +142,20 @@ class ServerConformanceTest(unittest.TestCase):
 
   def test_minimal_patch_request(self):
     for method in ServerConformanceTest.METHODS:
-      for remap_codepoints in {False, True}:
+      for remap_codepoints in [False, True]:
         with self.subTest(msg=f"{method} request."):
 
           init_response = self.request(self.request_path,
                                        method=method,
                                        data=ValidRequests.MINIMAL_REQUEST)
 
-          codepoint_map = init_response.codepoint_mapping() if remap_codepoints else None
+          codepoint_map = init_response.codepoint_mapping(
+          ) if remap_codepoints else None
           base_codepoints = init_response.codepoints_in_response()
           next_cp = self.next_available_codepoint(base_codepoints)
-          request_generator = lambda data: self.request(self.request_path, method=method, data=data)
-          patch_response = init_response.extend(request_generator,
-                                                {next_cp},
+          request_generator = lambda data, m=method: self.request(
+              self.request_path, method=m, data=data)
+          patch_response = init_response.extend(request_generator, {next_cp},
                                                 codepoint_map=codepoint_map)
 
           if PATCH not in patch_response.response():

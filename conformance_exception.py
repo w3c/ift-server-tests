@@ -1,3 +1,6 @@
+"""Exception raised when a conformance statement is violated."""
+
+
 class ConformanceException(Exception):
 
   def __init__(self, message, conformance_id):
