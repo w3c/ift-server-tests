@@ -166,6 +166,25 @@ class ServerConformanceTest(unittest.TestCase):
         response.check_apply_patch_to(expected)
         response.print_tested_ids()
 
+  def test_unrecognized_codepoint_reordering(self):
+    init_response = self.request(self.request_path,
+                                 method="GET",
+                                 data=ValidRequests.MINIMAL_REQUEST)
+
+    codepoint_map = init_response.codepoint_mapping()
+    base_codepoints = init_response.codepoints_in_response()
+    next_cp = self.next_available_codepoint(base_codepoints)
+    request_generator = lambda data: self.request(
+        self.request_path, method="GET", data=data)
+    patch_response = init_response.extend(request_generator, {next_cp},
+                                          codepoint_map=codepoint_map,
+                                          override_reordering_checksum=12345)
+
+    patch_response.assert_has_codepoint_mapping()
+    patch_response.successful_response_checks()
+    patch_response.not_patch_or_replacement()
+    patch_response.print_tested_ids()
+
   def test_minimal_patch_request(self):
     for method in ServerConformanceTest.METHODS:
       for remap_codepoints in [False, True]:

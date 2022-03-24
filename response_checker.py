@@ -119,7 +119,11 @@ class ResponseChecker:
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
     return subset
 
-  def extend(self, requester, new_codepoints, codepoint_map=None):
+  def extend(self,
+             requester,
+             new_codepoints,
+             codepoint_map=None,
+             override_reordering_checksum=None):
     """Make a second request that extends the font fetched by this one."""
     base = self.check_apply_patch_to(set())
     base_checksum = fast_hash.compute(base)
@@ -127,6 +131,8 @@ class ResponseChecker:
     base_codepoints = self.codepoints_in_response()
     ordering_checksum = self.ordering_checksum(
     ) if codepoint_map is not None else None
+    if override_reordering_checksum is not None:
+      ordering_checksum = override_reordering_checksum
 
     if codepoint_map:
       base_codepoints = {codepoint_map[cp] for cp in base_codepoints}
@@ -161,6 +167,13 @@ class ResponseChecker:
         self.conform_message("conform-response-codepoint-ordering",
                              "codepoint_ordering must be set."))
     return self
+
+  def not_patch_or_replacement(self):
+    """Tests that this response contains neither patch nor replacement data."""
+    self.test_case.assertFalse(
+        PATCH in self.response() or REPLACEMENT in self.response(),
+        self.conform_message("conform-bad-reordering",
+                             "Neither patch nor replacement may be set."))
 
   def codepoint_mapping(self):
     """Decodes and returns the codepoint mapping in the response."""
@@ -215,22 +228,23 @@ class ResponseChecker:
         self.conform_message("conform-response-protocol-version",
                              "protocol_version must be set to 0."))
 
-    self.test_case.assertTrue(
-        PATCH_FORMAT in response,
-        self.conform_message("conform-response-valid-format",
-                             "patch_format must be set."))
-    self.test_case.assertTrue(
-        response[PATCH_FORMAT] in PATCH_FORMATS,
-        self.conform_message(
-            "conform-response-valid-format",
-            f"patch_format {response[PATCH_FORMAT]} not in {PATCH_FORMATS}."))
+    if PATCH_FORMAT in response:
+      self.test_case.assertTrue(
+          response[PATCH_FORMAT] in PATCH_FORMATS,
+          self.conform_message(
+              "conform-response-valid-format",
+              f"patch_format {response[PATCH_FORMAT]} not in {PATCH_FORMATS}."))
 
     self.test_case.assertTrue(
-        bool(PATCH in response) != bool(REPLACEMENT in response),
+        not (bool(PATCH in response) and bool(REPLACEMENT in response)),
         self.conform_message("conform-response-patch-or-replacement",
                              "Only one of patch or replacement can be set."))
 
     if PATCH in response or REPLACEMENT in response:
+      self.test_case.assertTrue(
+          isinstance(response[PATCH_FORMAT], int),
+          self.conform_message("conform-response-font-checksums",
+                               "patch_format must be set."))
       self.test_case.assertTrue(
           isinstance(response[PATCHED_CHECKSUM], int),
           self.conform_message("conform-response-font-checksums",
