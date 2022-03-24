@@ -140,9 +140,10 @@ class ServerConformanceTest(unittest.TestCase):
   def test_minimal_sparse_set_request(self):
     for method in ServerConformanceTest.METHODS:
       with self.subTest(msg=f"{method} request."):
-        response = self.request(self.request_path,
-                                data=ValidRequests.MINIMAL_SPARSE_BIT_SET_REQUEST,
-                                method=method)
+        response = self.request(
+            self.request_path,
+            data=ValidRequests.MINIMAL_SPARSE_BIT_SET_REQUEST,
+            method=method)
 
         response.successful_response_checks()
         response.assert_has_codepoint_mapping()
@@ -164,7 +165,6 @@ class ServerConformanceTest(unittest.TestCase):
         expected.add(0x65)
         response.check_apply_patch_to(expected)
         response.print_tested_ids()
-
 
   def test_minimal_patch_request(self):
     for method in ServerConformanceTest.METHODS:
@@ -189,10 +189,14 @@ class ServerConformanceTest(unittest.TestCase):
                 "WARNING(test_minimal_patch_request_post): expected response to be a patch."
             )
 
+          additional_ids = [
+              "conform-remap-codepoints-have", "conform-remap-codepoints-needed"
+          ] if remap_codepoints else None
           base_codepoints.add(next_cp)
           patch_response.successful_response_checks()
           patch_response.format_in({VCDIFF})
-          patch_response.check_apply_patch_to(base_codepoints)
+          patch_response.check_apply_patch_to(
+              base_codepoints, additional_conformance_ids=additional_ids)
           patch_response.print_tested_ids()
 
 
