@@ -153,6 +153,22 @@ class ServerConformanceTest(unittest.TestCase):
         response.check_apply_patch_to(set(range(0x41, 0x61)))
         response.print_tested_ids()
 
+  def test_minimal_combined_set_request(self):
+    for method in ServerConformanceTest.METHODS:
+      with self.subTest(msg=f"{method} request."):
+        response = self.request(self.request_path,
+                                data=ValidRequests.MINIMAL_COMBINED_SET_REQUEST,
+                                method=method)
+
+        response.successful_response_checks()
+        response.assert_has_codepoint_mapping()
+        response.format_in({VCDIFF})
+        expected = set(range(0x41, 0x61))
+        expected.add(0x65)
+        response.check_apply_patch_to(expected)
+        response.print_tested_ids()
+
+
   def test_minimal_patch_request(self):
     for method in ServerConformanceTest.METHODS:
       for remap_codepoints in [False, True]:
