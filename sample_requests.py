@@ -31,10 +31,17 @@ COMPRESSED_SET_42 = {
     RANGE_DELTAS: bytes([0x42, 0x00]),
 }
 
-SPARSE_SET_41_60 = {
+SPARSE_SET_41_TO_60 = {
     SPARSE_BIT_SET: bytes([
       0x0D, 0x72, 0x0F, 0xE1, 0xFF, 0x1F
     ]),  # {0x41, ..., 0x60}
+}
+
+COMBINED_SET_41_TO_60_AND_65 = {
+    SPARSE_BIT_SET: bytes([
+      0x0D, 0x72, 0x0F, 0xE1, 0xFF, 0x1F
+    ]),  # {0x41, ..., 0x60}
+    RANGE_DELTAS: bytes([0x65, 0x00]),
 }
 
 # Patch Formats
@@ -56,7 +63,13 @@ class ValidRequests:
   MINIMAL_SPARSE_BIT_SET_REQUEST = dumps({
       PROTOCOL_VERSION: 0,
       ACCEPT_PATCH_FORMAT: [VCDIFF],
-      CODEPOINTS_NEEDED: SPARSE_SET_41_60,
+      CODEPOINTS_NEEDED: SPARSE_SET_41_TO_60,
+  })
+
+  MINIMAL_COMBINED_SET_REQUEST = dumps({
+      PROTOCOL_VERSION: 0,
+      ACCEPT_PATCH_FORMAT: [VCDIFF],
+      CODEPOINTS_NEEDED: COMBINED_SET_41_TO_60_AND_65,
   })
 
   # pylint: disable=no-self-argument
