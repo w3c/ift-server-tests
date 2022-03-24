@@ -34,6 +34,10 @@ PATCH_FORMATS = {VCDIFF, BROTLI}
 
 
 def spec_link(tag):
+  """Returns a link to conformance id(s) tag."""
+  if isinstance(tag, list):
+    return ",\n".join(
+        [f"https://w3c.github.io/IFT/Overview.html#{t}" for t in tag])
   return f"https://w3c.github.io/IFT/Overview.html#{tag}"
 
 
@@ -57,7 +61,11 @@ class ResponseChecker:
       print(f"tested conformance id: {tag}")
 
   def conform_message(self, tag, message):
-    self.tested_ids.add(tag)
+    """Message to print on failed conformance to requirement 'tag'."""
+    if isinstance(tag, list):
+      self.tested_ids.update(tag)
+    else:
+      self.tested_ids.add(tag)
     return (f"Failed requirement {spec_link(tag)}\n"
             f"  {message}\n"
             f"  Request URL: {self.url}")
@@ -88,7 +96,9 @@ class ResponseChecker:
             f"one of {patch_formats}"))
     return self
 
-  def check_apply_patch_to(self, min_codepoints):
+  def check_apply_patch_to(self,
+                           min_codepoints,
+                           additional_conformance_ids=None):
     """Checks that this response can be applied to base and covers at least min_codepoints."""
     response = self.response()
 
@@ -100,7 +110,10 @@ class ResponseChecker:
       patch = response[PATCH]
 
     subset = self.decode_patch(base, patch, response[PATCH_FORMAT])
-    self.font_has_at_least_codepoints(subset, min_codepoints)
+    self.font_has_at_least_codepoints(
+        subset,
+        min_codepoints,
+        additional_conformance_ids=additional_conformance_ids)
     self.patched_checksum_matches(subset)
 
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
@@ -255,14 +268,20 @@ class ResponseChecker:
             "conform-response-original-checksum",
             f"original_checksum must be set to {fast_hash.compute(font_data)}"))
 
-  def font_has_at_least_codepoints(self, font_data, subset):
+  def font_has_at_least_codepoints(self,
+                                   font_data,
+                                   subset,
+                                   additional_conformance_ids=None):
     """Checks that the font represented by font_data has at least the codepoints in set subset."""
+    tags = ["conform-response-subset"]
+    if additional_conformance_ids is not None:
+      tags.extend(additional_conformance_ids)
+
     all_codepoints = font_util.codepoints(font_data)
     self.test_case.assertTrue(
         subset.issubset(all_codepoints),
         self.conform_message(
-            "conform-response-subset",
-            f"Subset produced by patch must contain at "
+            tags, f"Subset produced by patch must contain at "
             f"least {subset}, but contains {all_codepoints}"))
 
   def checksum_matches(self, data, expected_checksum, failure_message):
