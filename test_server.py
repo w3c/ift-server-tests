@@ -120,13 +120,10 @@ class ServerConformanceTest(unittest.TestCase):
   #                     requests. Plus individual tests as needed to check special cases.
 
   # TODO(garretrieger): additional tests:
-  # - patch request, using previously provided codepoint ordering.
   # - patch request, mixing indices and codepoints.
-  # - patch request, not using previously providing codepoint ordering.
   # - patch request, with invalid codepoint ordering.
   # - patch request, bad original font checksum
   # - patch request, bad base checksum
-  # - requests which uses sparse bit sets
   def test_minimal_request(self):
     for method in ServerConformanceTest.METHODS:
       with self.subTest(msg=f"{method} request."):
