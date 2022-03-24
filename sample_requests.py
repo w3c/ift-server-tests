@@ -31,6 +31,12 @@ COMPRESSED_SET_42 = {
     RANGE_DELTAS: bytes([0x42, 0x00]),
 }
 
+SPARSE_SET_41_60 = {
+    SPARSE_BIT_SET: bytes([
+      0x0D, 0x72, 0x0F, 0xE1, 0xFF, 0x1F
+    ]),  # {0x41, ..., 0x60}
+}
+
 # Patch Formats
 VCDIFF = 0
 BROTLI = 1
@@ -45,6 +51,12 @@ class ValidRequests:
       PROTOCOL_VERSION: 0,
       ACCEPT_PATCH_FORMAT: [VCDIFF],
       CODEPOINTS_NEEDED: COMPRESSED_SET_41,
+  })
+
+  MINIMAL_SPARSE_BIT_SET_REQUEST = dumps({
+      PROTOCOL_VERSION: 0,
+      ACCEPT_PATCH_FORMAT: [VCDIFF],
+      CODEPOINTS_NEEDED: SPARSE_SET_41_60,
   })
 
   # pylint: disable=no-self-argument
