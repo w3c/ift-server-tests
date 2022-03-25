@@ -218,6 +218,15 @@ class ServerConformanceTest(unittest.TestCase):
               base_codepoints, additional_conformance_ids=additional_ids)
           patch_response.print_tested_ids()
 
+  def test_rejects_malformed_request(self):
+    for method in ServerConformanceTest.METHODS:
+      with self.subTest(msg=f"{method} request."):
+        response = self.request(self.request_path,
+                                data=ValidRequests.MALFORMED_REQUEST,
+                                method=method)
+
+        response.is_error_400()
+        response.print_tested_ids()
 
 if __name__ == '__main__':
   if len(sys.argv) != 4:
