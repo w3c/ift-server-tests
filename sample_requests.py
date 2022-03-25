@@ -72,6 +72,13 @@ class ValidRequests:
       COMBINED_SET_41_TO_60_AND_65,
   })
 
+  # TODO(garretrieger): Test a few variants of malformed:
+  #  - Violates sparse bit set rules.
+  #  - Violates range list rules.
+  #  - Violates PatchRequest rules.
+  MALFORMED_REQUEST = bytes([0x90, 0x25, 0xa5, 0xc3, 0x00, 0xc2, 0x68, 0xd7]) # Random bytes
+
+
   # pylint: disable=no-self-argument
   def compressed_set(codepoints):
     """Returns a compressed set containing the given codepoints."""
