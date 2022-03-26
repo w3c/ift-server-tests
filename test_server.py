@@ -68,13 +68,13 @@ class ServerConformanceTest(unittest.TestCase):
       headers = {}
 
     if is_post:
-      req = urllib.request.Request(f"https://{self.server_address}{path}",
+      req = urllib.request.Request(f"http://{self.server_address}{path}",
                                    headers=headers,
                                    data=data)
     else:
       base64_data = urlsafe_b64encode(data).decode("utf-8")
       req = urllib.request.Request(
-          f"https://{self.server_address}{path}?request={base64_data}",
+          f"http://{self.server_address}{path}?request={base64_data}",
           headers=headers)
 
     return ResponseChecker(
@@ -219,14 +219,32 @@ class ServerConformanceTest(unittest.TestCase):
           patch_response.print_tested_ids()
 
   def test_rejects_malformed_request(self):
-    for method in ServerConformanceTest.METHODS:
-      with self.subTest(msg=f"{method} request."):
-        response = self.request(self.request_path,
-                                data=ValidRequests.MALFORMED_REQUEST,
-                                method=method)
+    response = self.request(self.request_path,
+                            data=ValidRequests.MALFORMED_REQUEST,
+                            method="GET")
+    response.is_error_400()
+    response.print_tested_ids()
 
-        response.is_error_400()
-        response.print_tested_ids()
+  def test_rejects_malformed_version_request(self):
+    response = self.request(self.request_path,
+                            data=ValidRequests.MALFORMED_VERSION_REQUEST,
+                            method="GET")
+    response.is_error_400("conform-request-protocol-version")
+    response.print_tested_ids()
+
+  def test_rejects_malformed_ordering_checksum_request(self):
+    response = self.request(self.request_path,
+                            data=ValidRequests.MALFORMED_ORDERING_CHECKSUM_REQUEST,
+                            method="GET")
+    response.is_error_400("conform-request-ordering-checksum")
+    response.print_tested_ids()
+
+  def test_rejects_malformed_base_checksum_request(self):
+    response = self.request(self.request_path,
+                            data=ValidRequests.MALFORMED_BASE_CHECKSUM_REQUEST,
+                            method="GET")
+    response.is_error_400("conform-request-base-checksum")
+    response.print_tested_ids()
 
 if __name__ == '__main__':
   if len(sys.argv) != 4:

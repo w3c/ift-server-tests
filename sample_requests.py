@@ -77,7 +77,22 @@ class ValidRequests:
   #  - Violates range list rules.
   #  - Violates PatchRequest rules.
   MALFORMED_REQUEST = bytes([0x90, 0x25, 0xa5, 0xc3, 0x00, 0xc2, 0x68, 0xd7]) # Random bytes
-
+  MALFORMED_VERSION_REQUEST = dumps({
+      PROTOCOL_VERSION: 578343,
+      ACCEPT_PATCH_FORMAT: [VCDIFF],
+      CODEPOINTS_NEEDED: COMPRESSED_SET_41,
+  })
+  MALFORMED_ORDERING_CHECKSUM_REQUEST = dumps({
+      PROTOCOL_VERSION: 578343,
+      ACCEPT_PATCH_FORMAT: [VCDIFF],
+      INDICES_NEEDED: COMPRESSED_SET_41,
+  })
+  MALFORMED_BASE_CHECKSUM_REQUEST = dumps({
+      PROTOCOL_VERSION: 578343,
+      ACCEPT_PATCH_FORMAT: [VCDIFF],
+      CODEPOINTS_HAVE: COMPRESSED_SET_41,
+      CODEPOINTS_NEEDED: COMPRESSED_SET_41,
+  })
 
   # pylint: disable=no-self-argument
   def compressed_set(codepoints):

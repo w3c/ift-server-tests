@@ -85,11 +85,14 @@ class ResponseChecker:
     self.response_well_formed()
     return self
 
-  def is_error_400(self):
+  def is_error_400(self, extra_tag=None):
     """Checks that the response has status code 400."""
+    tags = ["conform-reject-malformed-request"]
+    if extra_tag:
+      tags.append(extra_tag)
     self.test_case.assertEqual(
         self.status_code, 400,
-        self.conform_message("conform-reject-malformed-request",
+        self.conform_message(tags,
                              "Status code must indicate failure (400)"))
 
 
