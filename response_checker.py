@@ -41,6 +41,7 @@ def spec_link(tag):
   return f"https://w3c.github.io/IFT/Overview.html#{tag}"
 
 
+# pylint: disable=too-many-public-methods
 class ResponseChecker:
   """Defines a set of common checks against a IFT server response."""
 
@@ -92,9 +93,7 @@ class ResponseChecker:
       tags.append(extra_tag)
     self.test_case.assertEqual(
         self.status_code, 400,
-        self.conform_message(tags,
-                             "Status code must indicate failure (400)"))
-
+        self.conform_message(tags, "Status code must indicate failure (400)"))
 
   def format_in(self, patch_formats):
     """Checks that format is one of the provided formats."""
