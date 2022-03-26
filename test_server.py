@@ -68,13 +68,13 @@ class ServerConformanceTest(unittest.TestCase):
       headers = {}
 
     if is_post:
-      req = urllib.request.Request(f"http://{self.server_address}{path}",
+      req = urllib.request.Request(f"https://{self.server_address}{path}",
                                    headers=headers,
                                    data=data)
     else:
       base64_data = urlsafe_b64encode(data).decode("utf-8")
       req = urllib.request.Request(
-          f"http://{self.server_address}{path}?request={base64_data}",
+          f"https://{self.server_address}{path}?request={base64_data}",
           headers=headers)
 
     return ResponseChecker(
@@ -233,9 +233,10 @@ class ServerConformanceTest(unittest.TestCase):
     response.print_tested_ids()
 
   def test_rejects_malformed_ordering_checksum_request(self):
-    response = self.request(self.request_path,
-                            data=ValidRequests.MALFORMED_ORDERING_CHECKSUM_REQUEST,
-                            method="GET")
+    response = self.request(
+        self.request_path,
+        data=ValidRequests.MALFORMED_ORDERING_CHECKSUM_REQUEST,
+        method="GET")
     response.is_error_400("conform-request-ordering-checksum")
     response.print_tested_ids()
 
@@ -245,6 +246,7 @@ class ServerConformanceTest(unittest.TestCase):
                             method="GET")
     response.is_error_400("conform-request-base-checksum")
     response.print_tested_ids()
+
 
 if __name__ == '__main__':
   if len(sys.argv) != 4:
