@@ -116,14 +116,18 @@ class ServerConformanceTest(unittest.TestCase):
                 0x1d, 0xf4, 0x02, 0x5e, 0xd3, 0xb8, 0x43, 0x21, 0x3b, 0xae, 0xde
             ])), 0xb31e9c70768205fb)
 
-  # TODO(garretrieger): consider writing a parameterized tests against the set of all valid
-  #                     requests. Plus individual tests as needed to check special cases.
-
-  # TODO(garretrieger): additional tests:
-  # - patch request, mixing indices and codepoints.
-  # - patch request, with invalid codepoint ordering.
-  # - patch request, bad original font checksum
-  # - patch request, bad base checksum
+  # TODO(garretrieger):
+  # Extending coverage:
+  # - patch request, unrecognized original font checksum (#conform-response-valid-patch)
+  # - patch request, unrecognized base checksum (#conform-response-valid-patch)
+  # Mising tests:
+  # - Variable axes conformance statements.
+  # - codepoint ordering must contain all codepoints in the original font. (#codepoint-reordering)
+  # - must support VCDIFF (#patch-formats)
+  # - rejects invalid integer list (#integerlist, #sortedintegerlist)
+  # - must ignore unrecognized fields (#objects)
+  # - rejects malformed axis interval (#AxisInterval)
+  # - Supports range requests.
   def test_minimal_request(self):
     for method in ServerConformanceTest.METHODS:
       with self.subTest(msg=f"{method} request."):
