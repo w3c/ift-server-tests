@@ -122,7 +122,6 @@ class ServerConformanceTest(unittest.TestCase):
   # - patch request, unrecognized base checksum (#conform-response-valid-patch)
   # Mising tests:
   # - Variable axes conformance statements.
-  # - must ignore unrecognized fields (#objects)
   # - rejects malformed axis interval (#AxisInterval)
   # - Supports range requests.
   def test_minimal_request(self):
@@ -137,6 +136,18 @@ class ServerConformanceTest(unittest.TestCase):
         response.format_in({VCDIFF})
         response.check_apply_patch_to({0x41})
         response.print_tested_ids()
+
+  def test_ignores_unrecognized_fields(self):
+    for method in ServerConformanceTest.METHODS:
+      with self.subTest(msg=f"{method} request."):
+        response = self.request(self.request_path,
+                                data=ValidRequests.MINIMAL_REQUEST_EXTRA_FIELDS,
+                                method=method)
+
+        response.successful_response_checks()
+        response.tested("conform-object-unrecognized-field")
+        response.print_tested_ids()
+
 
   def test_minimal_sparse_set_request(self):
     for method in ServerConformanceTest.METHODS:

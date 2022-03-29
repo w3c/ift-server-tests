@@ -63,13 +63,17 @@ class ResponseChecker:
 
   def conform_message(self, tag, message):
     """Message to print on failed conformance to requirement 'tag'."""
+    self.tested(tag)
+    return (f"Failed requirement {spec_link(tag)}\n"
+            f"  {message}\n"
+            f"  Request URL: {self.url}")
+
+  def tested(self, tag):
+    """Adds tag(s) to the list of tested ids."""
     if isinstance(tag, list):
       self.tested_ids.update(tag)
     else:
       self.tested_ids.add(tag)
-    return (f"Failed requirement {spec_link(tag)}\n"
-            f"  {message}\n"
-            f"  Request URL: {self.url}")
 
   def successful_response_checks(self):
     """Checks all of the invariants that should be true on a successful response."""
@@ -128,7 +132,7 @@ class ResponseChecker:
 
     # If we got this far and the format was VCDIFF that we can confirm the server supports
     # VCDIFF
-    self.tested_ids.add("conform-vcdiff")
+    self.tested("conform-vcdiff")
 
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
     return subset
