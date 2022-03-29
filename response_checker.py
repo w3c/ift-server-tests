@@ -187,11 +187,13 @@ class ResponseChecker:
 
     mapping = self.codepoint_mapping()
     original_cps = font_util.codepoints(self.original_font_bytes)
-    for cp in original_cps:
-      self.test_case.assertTrue(cp in mapping,
-                      self.conform_message("conform-remap-all",
-                                           f"All codepoints in the original font must be "
-                                           f"in the codepoint reordering. {cp} is missing."))
+    for codepoint in original_cps:
+      self.test_case.assertTrue(
+          codepoint in mapping,
+          self.conform_message(
+              "conform-remap-all",
+              f"All codepoints in the original font must be "
+              f"in the codepoint reordering. {codepoint} is missing."))
     return self
 
   def not_patch_or_replacement(self):

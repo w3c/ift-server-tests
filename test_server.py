@@ -148,7 +148,6 @@ class ServerConformanceTest(unittest.TestCase):
         response.tested("conform-object-unrecognized-field")
         response.print_tested_ids()
 
-
   def test_minimal_sparse_set_request(self):
     for method in ServerConformanceTest.METHODS:
       with self.subTest(msg=f"{method} request."):
