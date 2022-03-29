@@ -170,12 +170,20 @@ class ResponseChecker:
     response = self.response()
     return response[ORDERING_CHECKSUM]
 
-  def assert_has_codepoint_mapping(self):
+  def has_codepoint_mapping(self):
     """Tests if the response contains a codepoint mapping."""
     self.test_case.assertTrue(
         CODEPOINT_ORDERING in self.response(),
         self.conform_message("conform-response-codepoint-ordering",
                              "codepoint_ordering must be set."))
+
+    mapping = self.codepoint_mapping()
+    original_cps = font_util.codepoints(self.original_font_bytes)
+    for cp in original_cps:
+      self.test_case.assertTrue(cp in mapping,
+                      self.conform_message("conform-remap-all",
+                                           f"All codepoints in the original font must be "
+                                           f"in the codepoint reordering. {cp} is missing."))
     return self
 
   def not_patch_or_replacement(self):
@@ -187,7 +195,6 @@ class ResponseChecker:
 
   def codepoint_mapping(self):
     """Decodes and returns the codepoint mapping in the response."""
-    self.assert_has_codepoint_mapping()
     response = self.response()
     try:
       mapping_list = integer_list.decode(response[CODEPOINT_ORDERING])
