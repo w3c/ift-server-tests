@@ -122,8 +122,6 @@ class ServerConformanceTest(unittest.TestCase):
   # - patch request, unrecognized base checksum (#conform-response-valid-patch)
   # Mising tests:
   # - Variable axes conformance statements.
-  # - codepoint ordering must contain all codepoints in the original font. (#codepoint-reordering)
-  # - must support VCDIFF (#patch-formats)
   # - rejects invalid integer list (#integerlist, #sortedintegerlist)
   # - must ignore unrecognized fields (#objects)
   # - rejects malformed axis interval (#AxisInterval)

@@ -126,6 +126,10 @@ class ResponseChecker:
         additional_conformance_ids=additional_conformance_ids)
     self.patched_checksum_matches(subset)
 
+    # If we got this far and the format was VCDIFF that we can confirm the server supports
+    # VCDIFF
+    self.tested_ids.add("conform-vcdiff")
+
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
     return subset
 
