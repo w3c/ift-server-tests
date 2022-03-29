@@ -93,6 +93,15 @@ class ValidRequests:
       CODEPOINTS_NEEDED: COMPRESSED_SET_41,
   })
 
+  MALFORMED_INTEGER_LIST_REQUEST = dumps({
+      PROTOCOL_VERSION: 0,
+      ACCEPT_PATCH_FORMAT: [VCDIFF],
+      CODEPOINTS_NEEDED: {
+          RANGE_DELTAS: bytes([0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F]),
+      }
+  })
+
+
   # pylint: disable=no-self-argument
   def compressed_set(codepoints):
     """Returns a compressed set containing the given codepoints."""

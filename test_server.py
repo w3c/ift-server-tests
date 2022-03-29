@@ -122,7 +122,6 @@ class ServerConformanceTest(unittest.TestCase):
   # - patch request, unrecognized base checksum (#conform-response-valid-patch)
   # Mising tests:
   # - Variable axes conformance statements.
-  # - rejects invalid integer list (#integerlist, #sortedintegerlist)
   # - must ignore unrecognized fields (#objects)
   # - rejects malformed axis interval (#AxisInterval)
   # - Supports range requests.
@@ -248,6 +247,13 @@ class ServerConformanceTest(unittest.TestCase):
                             data=ValidRequests.MALFORMED_BASE_CHECKSUM_REQUEST,
                             method="GET")
     response.is_error_400("conform-request-base-checksum")
+    response.print_tested_ids()
+
+  def test_rejects_malformed_integer_list_request(self):
+    response = self.request(self.request_path,
+                            data=ValidRequests.MALFORMED_INTEGER_LIST_REQUEST,
+                            method="GET")
+    response.is_error_400("conform-sorted-integer-list-rejects-illegal")
     response.print_tested_ids()
 
 
