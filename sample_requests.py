@@ -65,7 +65,6 @@ class ValidRequests:
       57488: 1234  # Unrecognized field.
   })
 
-
   MINIMAL_SPARSE_BIT_SET_REQUEST = dumps({
       PROTOCOL_VERSION: 0,
       ACCEPT_PATCH_FORMAT: [VCDIFF],
@@ -108,7 +107,6 @@ class ValidRequests:
           RANGE_DELTAS: bytes([0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F]),
       }
   })
-
 
   # pylint: disable=no-self-argument
   def compressed_set(codepoints):
