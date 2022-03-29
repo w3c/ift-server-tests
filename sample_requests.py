@@ -46,9 +46,6 @@ COMBINED_SET_41_TO_60_AND_65 = {
 VCDIFF = 0
 BROTLI = 1
 
-# TODO(garretrieger): add variations of set encoding.
-
-
 class ValidRequests:
   """Helper that holds sample requests, and methods to produce them."""
 
@@ -77,10 +74,6 @@ class ValidRequests:
       CODEPOINTS_NEEDED: COMBINED_SET_41_TO_60_AND_65,
   })
 
-  # TODO(garretrieger): Test a few variants of malformed:
-  #  - Violates sparse bit set rules.
-  #  - Violates range list rules.
-  #  - Violates PatchRequest rules.
   MALFORMED_REQUEST = bytes([0x90, 0x25, 0xa5, 0xc3, 0x00, 0xc2, 0x68,
                              0xd7])  # Random bytes
   MALFORMED_VERSION_REQUEST = dumps({
