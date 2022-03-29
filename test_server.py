@@ -136,7 +136,7 @@ class ServerConformanceTest(unittest.TestCase):
                                 method=method)
 
         response.successful_response_checks()
-        response.assert_has_codepoint_mapping()
+        response.has_codepoint_mapping()
         response.format_in({VCDIFF})
         response.check_apply_patch_to({0x41})
         response.print_tested_ids()
@@ -150,7 +150,7 @@ class ServerConformanceTest(unittest.TestCase):
             method=method)
 
         response.successful_response_checks()
-        response.assert_has_codepoint_mapping()
+        response.has_codepoint_mapping()
         response.format_in({VCDIFF})
         response.check_apply_patch_to(set(range(0x41, 0x61)))
         response.print_tested_ids()
@@ -163,7 +163,7 @@ class ServerConformanceTest(unittest.TestCase):
                                 method=method)
 
         response.successful_response_checks()
-        response.assert_has_codepoint_mapping()
+        response.has_codepoint_mapping()
         response.format_in({VCDIFF})
         expected = set(range(0x41, 0x61))
         expected.add(0x65)
@@ -184,7 +184,7 @@ class ServerConformanceTest(unittest.TestCase):
                                           codepoint_map=codepoint_map,
                                           override_reordering_checksum=12345)
 
-    patch_response.assert_has_codepoint_mapping()
+    patch_response.has_codepoint_mapping()
     patch_response.successful_response_checks()
     patch_response.not_patch_or_replacement()
     patch_response.print_tested_ids()
@@ -198,6 +198,7 @@ class ServerConformanceTest(unittest.TestCase):
                                        method=method,
                                        data=ValidRequests.MINIMAL_REQUEST)
 
+          init_response.has_codepoint_mapping()
           codepoint_map = init_response.codepoint_mapping(
           ) if remap_codepoints else None
           base_codepoints = init_response.codepoints_in_response()
