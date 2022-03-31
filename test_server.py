@@ -134,6 +134,18 @@ class ServerConformanceTest(unittest.TestCase):
         response.check_apply_patch_to({0x41})
         response.print_tested_ids()
 
+  def test_unrecognized_format(self):
+    response = self.request(self.request_path,
+                            data=ValidRequests.UNRECOGNIZED_FORMAT,
+                            method="GET")
+
+    response.successful_response_checks()
+    response.has_codepoint_mapping()
+    response.format_in({VCDIFF})
+    response.check_apply_patch_to({0x41})
+    response.tested("conform-response-ignore-unrecognized-formats")
+    response.print_tested_ids()
+
   def test_ignores_unrecognized_fields(self):
     for method in ServerConformanceTest.METHODS:
       with self.subTest(msg=f"{method} request."):
