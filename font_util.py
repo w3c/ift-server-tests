@@ -18,3 +18,8 @@ def codepoints(font_data):
     all_codepoints.update(table.cmap.keys())
 
   return all_codepoints
+
+
+def axis_space(font_data):
+  # TODO(garretrieger)
+  pass

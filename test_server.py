@@ -23,6 +23,7 @@ from response_checker import PATCH
 from response_checker import VCDIFF
 from response_checker import ResponseChecker
 from sample_requests import ValidRequests
+import axis_util
 import fast_hash
 import font_util
 import integer_list
@@ -30,7 +31,11 @@ import integer_list
 
 def print_usage():
   print(
-      "python3 test_server.py <server host> <request path> <original font file>"
+      "python3 test_server.py <server host> <request path> <original font file>\n"
+      "\n"
+      "If the original font file is a variable font, then additional tests specific "
+      "to the servers handling of variable fonts will be run in addition to the regular "
+      "conformance tests."
   )
 
 
@@ -115,6 +120,37 @@ class ServerConformanceTest(unittest.TestCase):
             bytes([
                 0x1d, 0xf4, 0x02, 0x5e, 0xd3, 0xb8, 0x43, 0x21, 0x3b, 0xae, 0xde
             ])), 0xb31e9c70768205fb)
+
+  def test_axis_space_equals(self):
+    space_1 = {
+        b"wght": [{0: 400}],
+        b"wdth": [{0: 300}, {0: 100, 1:200}],
+    }
+    space_2 = {
+        b"wdth": [{0: 100, 1:200}, {0: 300}],
+        b"wght": [{0: 400, 1:400}],
+    }
+    space_3 = {
+        b"wght": [{0: 400}],
+    }
+    space_4 = {
+        b"wght": [{0: 500}],
+    }
+    space_5 = {
+        b"wght": [{0: 400}],
+        b"wdth": [{0: 300}, {0: 100, 1:205}],
+    }
+    space_6 = {
+        b"ital": [{0: 400}],
+        b"wdth": [{0: 300}, {0: 100, 1:200}],
+    }
+
+    self.assertTrue(axis_util.axis_space_equal(space_1, space_2))
+    self.assertFalse(axis_util.axis_space_equal(space_1, space_3))
+    self.assertFalse(axis_util.axis_space_equal(space_3, space_4))
+    self.assertFalse(axis_util.axis_space_equal(space_1, space_5))
+    self.assertFalse(axis_util.axis_space_equal(space_1, space_6))
+
 
   # TODO(garretrieger):
   # Mising tests:
