@@ -230,6 +230,28 @@ class ServerConformanceTest(unittest.TestCase):
               base_codepoints, additional_conformance_ids=additional_ids)
           patch_response.print_tested_ids()
 
+  def test_patch_request_incorrect_original_font_checksum(self):
+    """Checks that a bad original font checksum is handled without error."""
+    method = "GET"
+    with self.subTest(msg=f"{method} request."):
+
+      init_response = self.request(self.request_path,
+                                   method=method,
+                                   data=ValidRequests.MINIMAL_REQUEST)
+
+      base_codepoints = init_response.codepoints_in_response()
+      next_cp = self.next_available_codepoint(base_codepoints)
+      request_generator = lambda data, m=method: self.request(
+          self.request_path, method=m, data=data)
+      patch_response = init_response.extend(request_generator, {next_cp},
+                                            override_original_checksum=1234)
+
+      base_codepoints.add(next_cp)
+      patch_response.successful_response_checks()
+      patch_response.format_in({VCDIFF})
+      patch_response.check_apply_patch_to(base_codepoints)
+      patch_response.print_tested_ids()
+
   def test_rejects_malformed_request(self):
     response = self.request(self.request_path,
                             data=ValidRequests.MALFORMED_REQUEST,
