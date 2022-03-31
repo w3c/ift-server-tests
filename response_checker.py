@@ -137,15 +137,19 @@ class ResponseChecker:
     # TODO(garretrieger): font shapes identical to original for subset codepoints.
     return subset
 
+  # pylint: disable=too-many-arguments
   def extend(self,
              requester,
              new_codepoints,
              codepoint_map=None,
-             override_reordering_checksum=None):
+             override_reordering_checksum=None,
+             override_original_checksum=None):
     """Make a second request that extends the font fetched by this one."""
     base = self.check_apply_patch_to(set())
     base_checksum = fast_hash.compute(base)
-    original_checksum = self.original_font_checksum()
+    original_checksum = (self.original_font_checksum()
+                         if override_original_checksum is None else
+                         override_original_checksum)
     base_codepoints = self.codepoints_in_response()
     ordering_checksum = self.ordering_checksum(
     ) if codepoint_map is not None else None
