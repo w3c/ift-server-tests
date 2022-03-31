@@ -143,10 +143,12 @@ class ResponseChecker:
              new_codepoints,
              codepoint_map=None,
              override_reordering_checksum=None,
-             override_original_checksum=None):
+             override_original_checksum=None,
+             override_base_checksum=None):
     """Make a second request that extends the font fetched by this one."""
     base = self.check_apply_patch_to(set())
-    base_checksum = fast_hash.compute(base)
+    base_checksum = (fast_hash.compute(base) if override_base_checksum is None
+                     else override_base_checksum)
     original_checksum = (self.original_font_checksum()
                          if override_original_checksum is None else
                          override_original_checksum)
