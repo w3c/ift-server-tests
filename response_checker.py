@@ -90,6 +90,16 @@ class ResponseChecker:
     self.response_well_formed()
     return self
 
+  def original_axis_space(self):
+    response = self.response()
+    return response[ORIGINAL_AXIS_SPACE]
+
+  def original_axis_space_is(self, axis_space):
+    self.test_case.assertTrue(ORIGINAL_AXIS_SPACE in self.response(),
+                              self.conform_message("conform-response-original-axis-space",
+                                                   "original_axis_space must be set."))
+    # TODO(garretrieger): check equality.
+
   def is_error_400(self, extra_tag=None):
     """Checks that the response has status code 400."""
     tags = ["conform-reject-malformed-request"]
