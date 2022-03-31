@@ -117,9 +117,6 @@ class ServerConformanceTest(unittest.TestCase):
             ])), 0xb31e9c70768205fb)
 
   # TODO(garretrieger):
-  # Extending coverage:
-  # - patch request, unrecognized original font checksum (#conform-response-valid-patch)
-  # - patch request, unrecognized base checksum (#conform-response-valid-patch)
   # Mising tests:
   # - Variable axes conformance statements.
   # - rejects malformed axis interval (#AxisInterval)
@@ -245,6 +242,28 @@ class ServerConformanceTest(unittest.TestCase):
           self.request_path, method=m, data=data)
       patch_response = init_response.extend(request_generator, {next_cp},
                                             override_original_checksum=1234)
+
+      base_codepoints.add(next_cp)
+      patch_response.successful_response_checks()
+      patch_response.format_in({VCDIFF})
+      patch_response.check_apply_patch_to(base_codepoints)
+      patch_response.print_tested_ids()
+
+  def test_patch_request_incorrect_base_checksum(self):
+    """Checks that a bad base checksum is handled without error."""
+    method = "GET"
+    with self.subTest(msg=f"{method} request."):
+
+      init_response = self.request(self.request_path,
+                                   method=method,
+                                   data=ValidRequests.MINIMAL_REQUEST)
+
+      base_codepoints = init_response.codepoints_in_response()
+      next_cp = self.next_available_codepoint(base_codepoints)
+      request_generator = lambda data, m=method: self.request(
+          self.request_path, method=m, data=data)
+      patch_response = init_response.extend(request_generator, {next_cp},
+                                            override_base_checksum=1234)
 
       base_codepoints.add(next_cp)
       patch_response.successful_response_checks()

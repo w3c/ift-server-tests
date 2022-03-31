@@ -46,6 +46,7 @@ COMBINED_SET_41_TO_60_AND_65 = {
 VCDIFF = 0
 BROTLI = 1
 
+
 class ValidRequests:
   """Helper that holds sample requests, and methods to produce them."""
 
