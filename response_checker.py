@@ -95,6 +95,7 @@ class ResponseChecker:
     return response[ORIGINAL_AXIS_SPACE]
 
   def original_axis_space_is(self, axis_space):
+    # TODO(garretrieger): well formed check for axis space (ie start <= end)
     self.test_case.assertTrue(ORIGINAL_AXIS_SPACE in self.response(),
                               self.conform_message("conform-response-original-axis-space",
                                                    "original_axis_space must be set."))
