@@ -99,7 +99,11 @@ class ResponseChecker:
     self.test_case.assertTrue(ORIGINAL_AXIS_SPACE in self.response(),
                               self.conform_message("conform-response-original-axis-space",
                                                    "original_axis_space must be set."))
-    # TODO(garretrieger): check equality.
+    self.test_case.assertTrue(axis_util.axis_space_equal(self.original_axis_space(), axis_space),
+                              self.conform_message("conform-response-original-axis-space",
+                                                   f"original_axis_space must be set to the axis "
+                                                   f"space of the original font "
+                                                   f"{axis_space} != {self.original_axis_space()}"))
 
   def is_error_400(self, extra_tag=None):
     """Checks that the response has status code 400."""

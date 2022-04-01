@@ -44,7 +44,10 @@ def axis_space(font_data):
 
 def add_intervals(intervals, interval):
   """Union interval into intervals which is sorted by start value."""
-  bisect.insort(intervals, interval, key=lambda interval: interval[0])
+  keys = [i[0] for i in intervals]
+  index = bisect.bisect(keys, interval[0])
+  intervals.insert(index, interval)
+
   merged = []
   i = 0
   while i < len(intervals):
