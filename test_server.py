@@ -168,6 +168,11 @@ class ServerConformanceTest(unittest.TestCase):
         response.has_codepoint_mapping()
         response.format_in({VCDIFF})
         response.check_apply_patch_to({0x41})
+
+        axis_space = font_util.axis_space(self.original_font_bytes)
+        if axis_space:
+          response.original_axis_space_is(axis_space)
+
         response.print_tested_ids()
 
   def test_unrecognized_format(self):
