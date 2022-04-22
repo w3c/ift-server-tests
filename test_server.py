@@ -35,8 +35,7 @@ def print_usage():
       "\n"
       "If the original font file is a variable font, then additional tests specific "
       "to the servers handling of variable fonts will be run in addition to the regular "
-      "conformance tests."
-  )
+      "conformance tests.")
 
 
 class IgnoreHttpErrors(urllib.request.HTTPErrorProcessor):
@@ -48,6 +47,7 @@ class IgnoreHttpErrors(urllib.request.HTTPErrorProcessor):
   https_response = http_response
 
 
+# pylint: disable=too-many-public-methods
 class ServerConformanceTest(unittest.TestCase):
   """Patch Subset Server conformance test."""
 
@@ -123,26 +123,59 @@ class ServerConformanceTest(unittest.TestCase):
 
   def test_axis_space_equals(self):
     space_1 = {
-        b"wght": [{0: 400}],
-        b"wdth": [{0: 300}, {0: 100, 1:200}],
+        b"wght": [{
+            0: 400
+        }],
+        b"wdth": [{
+            0: 300
+        }, {
+            0: 100,
+            1: 200
+        }],
     }
     space_2 = {
-        b"wdth": [{0: 100, 1:200}, {0: 300}],
-        b"wght": [{0: 400, 1:400}],
+        b"wdth": [{
+            0: 100,
+            1: 200
+        }, {
+            0: 300
+        }],
+        b"wght": [{
+            0: 400,
+            1: 400
+        }],
     }
     space_3 = {
-        b"wght": [{0: 400}],
+        b"wght": [{
+            0: 400
+        }],
     }
     space_4 = {
-        b"wght": [{0: 500}],
+        b"wght": [{
+            0: 500
+        }],
     }
     space_5 = {
-        b"wght": [{0: 400}],
-        b"wdth": [{0: 300}, {0: 100, 1:205}],
+        b"wght": [{
+            0: 400
+        }],
+        b"wdth": [{
+            0: 300
+        }, {
+            0: 100,
+            1: 205
+        }],
     }
     space_6 = {
-        b"ital": [{0: 400}],
-        b"wdth": [{0: 300}, {0: 100, 1:200}],
+        b"ital": [{
+            0: 400
+        }],
+        b"wdth": [{
+            0: 300
+        }, {
+            0: 100,
+            1: 200
+        }],
     }
 
     self.assertTrue(axis_util.axis_space_equal(space_1, space_2))
@@ -150,7 +183,6 @@ class ServerConformanceTest(unittest.TestCase):
     self.assertFalse(axis_util.axis_space_equal(space_3, space_4))
     self.assertFalse(axis_util.axis_space_equal(space_1, space_5))
     self.assertFalse(axis_util.axis_space_equal(space_1, space_6))
-
 
   # TODO(garretrieger):
   # Mising tests:
