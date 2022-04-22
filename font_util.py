@@ -22,6 +22,7 @@ def codepoints(font_data):
 
 
 def axis_space(font_data):
+  """Returns the axis space covered by the font, font_data."""
   font = TTFont(io.BytesIO(font_data))
   if "fvar" not in font:
     return {}
@@ -34,8 +35,9 @@ def axis_space(font_data):
       space[tag] = []
 
     if axis.minValue > axis.maxValue:
-      raise Exception(f"Invalid font min value ({axis.minValue} > max value ({axis.maxValue} for "
-                      f"{tag} axis.")
+      raise Exception(
+          f"Invalid font min value ({axis.minValue} > max value ({axis.maxValue} for "
+          f"{tag} axis.")
 
     add_intervals(space[tag], {0: axis.minValue, 1: axis.maxValue})
 
@@ -53,8 +55,8 @@ def add_intervals(intervals, interval):
   while i < len(intervals):
     current = intervals[i]
 
-    while i < len(intervals) - 1 and intersects(current, intervals[i+1]):
-      current = union(current, intervals[i+1])
+    while i < len(intervals) - 1 and intersects(current, intervals[i + 1]):
+      current = union(current, intervals[i + 1])
       i += 1
 
     merged.append(current)
@@ -64,6 +66,7 @@ def add_intervals(intervals, interval):
 
 
 def union(interval_1, interval_2):
+  """Returns the union of interval_1 and interval_2."""
   a_start = interval_1[0]
   b_start = interval_2[0]
   a_end = interval_1[1]
@@ -73,6 +76,7 @@ def union(interval_1, interval_2):
 
 
 def intersects(interval_1, interval_2):
+  """Returns true if interval_1 and interval_2 intersect."""
   a_start = interval_1[0]
   b_start = interval_2[0]
   a_end = interval_1[1]
