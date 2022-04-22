@@ -167,11 +167,13 @@ class ServerConformanceTest(unittest.TestCase):
         response.successful_response_checks()
         response.has_codepoint_mapping()
         response.format_in({VCDIFF})
-        response.check_apply_patch_to({0x41})
+        subset_bytes = response.check_apply_patch_to({0x41})
 
-        axis_space = font_util.axis_space(self.original_font_bytes)
-        if axis_space:
-          response.original_axis_space_is(axis_space)
+        original_axis_space = font_util.axis_space(self.original_font_bytes)
+        subset_axis_space = font_util.axis_space(subset_bytes)
+        if original_axis_space:
+          response.original_axis_space_is(original_axis_space)
+          response.subset_axis_space_is(subset_axis_space)
 
         response.print_tested_ids()
 
