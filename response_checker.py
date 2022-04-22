@@ -106,6 +106,22 @@ class ResponseChecker:
                                                    f"space of the original font "
                                                    f"{axis_space} != {self.original_axis_space()}"))
 
+
+  def subset_axis_space(self):
+    response = self.response()
+    return response[SUBSET_AXIS_SPACE]
+
+  def subset_axis_space_is(self, axis_space):
+    # TODO(garretrieger): well formed check for axis space (ie start <= end)
+    self.test_case.assertTrue(SUBSET_AXIS_SPACE in self.response(),
+                              self.conform_message("conform-response-subset-axis-space",
+                                                   "subset_axis_space must be set."))
+    self.test_case.assertTrue(axis_util.axis_space_equal(self.subset_axis_space(), axis_space),
+                              self.conform_message("conform-response-subset-axis-space",
+                                                   f"subset_axis_space must be set to the axis "
+                                                   f"space of the subset font "
+                                                   f"{axis_space} != {self.subset_axis_space()}"))
+
   def is_error_400(self, extra_tag=None):
     """Checks that the response has status code 400."""
     tags = ["conform-reject-malformed-request"]
