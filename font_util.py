@@ -29,7 +29,7 @@ def axis_space(font_data):
   fvar = font["fvar"]
   space = {}
   for axis in fvar.axes:
-    tag = axis.axisTag
+    tag = bytes(axis.axisTag, "utf8")
     if tag not in space:
       space[tag] = []
 
