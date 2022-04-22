@@ -5,6 +5,7 @@ Helper for checking common cases on incremental font transfer server responses.
 import subprocess
 import tempfile
 
+import axis_util
 from cbor2 import loads
 import font_util
 import fast_hash
