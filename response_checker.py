@@ -12,6 +12,7 @@ import fast_hash
 from sample_requests import ValidRequests
 import integer_list
 from conformance_exception import ConformanceException
+import shaping_check
 
 # PatchResponse Fields
 
@@ -98,7 +99,6 @@ class ResponseChecker:
 
   def original_axis_space_is(self, axis_space):
     """Asserts the response sets original axis space and it's equal to axis_space."""
-    # TODO(garretrieger): well formed check for axis space (ie start <= end)
     self.test_case.assertTrue(
         ORIGINAL_AXIS_SPACE in self.response(),
         self.conform_message("conform-response-original-axis-space",
@@ -118,7 +118,6 @@ class ResponseChecker:
 
   def subset_axis_space_is(self, axis_space):
     """Asserts the response sets subset axis space and it's equal to axis_space."""
-    # TODO(garretrieger): well formed check for axis space (ie start <= end)
     self.test_case.assertTrue(
         SUBSET_AXIS_SPACE in self.response(),
         self.conform_message("conform-response-subset-axis-space",
@@ -410,6 +409,14 @@ class ResponseChecker:
         self.conform_message(
             tags, f"Subset produced by patch must contain at "
             f"least {subset}, but contains {all_codepoints}"))
+
+    self.test_case.assertTrue(
+        shaping_check.identical_shaping(self.original_font_bytes, font_data,
+                                        subset),
+        self.conform_message(
+            "conform-font-subset",
+            "Generated font subset rendering is not identical "
+            "to the original font."))
 
   def checksum_matches(self, data, expected_checksum, failure_message):
     self.test_case.assertEqual(fast_hash.compute(data), expected_checksum,
