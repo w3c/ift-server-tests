@@ -93,6 +93,7 @@ class ResponseChecker:
 
   def original_axis_space(self):
     response = self.response()
+    self.axis_space_well_formed(response[ORIGINAL_AXIS_SPACE])
     return response[ORIGINAL_AXIS_SPACE]
 
   def original_axis_space_is(self, axis_space):
@@ -112,6 +113,7 @@ class ResponseChecker:
 
   def subset_axis_space(self):
     response = self.response()
+    self.axis_space_well_formed(response[SUBSET_AXIS_SPACE])
     return response[SUBSET_AXIS_SPACE]
 
   def subset_axis_space_is(self, axis_space):
@@ -128,6 +130,26 @@ class ResponseChecker:
             f"subset_axis_space must be set to the axis "
             f"space of the subset font "
             f"{axis_space} != {self.subset_axis_space()}"))
+
+  def axis_space_well_formed(self, space):
+    # interval lists are disjoint.
+    for tag, intervals in space.items():
+      for interval in intervals:
+        self.axis_interval_well_formed(interval)
+
+  def axis_interval_well_formed(self, interval):
+    # start is set.
+    # end is not set or >= start.
+    self.test_case.assertTrue(
+        axis_util.AXIS_START in interval,
+        self.conform_message("conform-axis-interval-start",
+                             "AxisInterval.start must be set."))
+    if axis_util.AXIS_END not in interval:
+      return
+
+    self.test_case.assertGreater(interval[axis_util.AXIS_END], interval[axis_util.AXIS_START],
+                                 self.conform_message("conform-axis-interval-start",
+                                                      "AxisInterval.end must be greater than start."))
 
   def is_error_400(self, extra_tag=None):
     """Checks that the response has status code 400."""
