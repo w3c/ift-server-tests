@@ -186,9 +186,7 @@ class ServerConformanceTest(unittest.TestCase):
 
   # TODO(garretrieger):
   # Mising tests:
-  # - rejects malformed axis interval (#AxisInterval)
   # - Supports range requests.
-  # - Subset shaping tests.
   def test_minimal_request(self):
     for method in ServerConformanceTest.METHODS:
       with self.subTest(msg=f"{method} request."):
