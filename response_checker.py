@@ -132,24 +132,43 @@ class ResponseChecker:
             f"{axis_space} != {self.subset_axis_space()}"))
 
   def axis_space_well_formed(self, space):
+    """Tests if the provided axis space is well-formed according to the spec."""
     # interval lists are disjoint.
-    for tag, intervals in space.items():
+    for intervals in space.values():
       for interval in intervals:
         self.axis_interval_well_formed(interval)
 
+      sorted_intervals = sorted(
+          intervals, key=lambda interval: interval[axis_util.AXIS_START])
+      if len(sorted_intervals) <= 1:
+        self.tested("conform-axis-space-disjoint")
+        return
+
+      for i in range(len(sorted_intervals) - 1):
+        interval = sorted_intervals[i]
+        next_interval = sorted_intervals[i + 1]
+        self.test_case.assertLess(
+            interval[axis_util.AXIS_END], next_interval[axis_util.AXIS_START],
+            self.conform_message("conform-axis-space-disjoint",
+                                 "AxisInterval.start must be set."))
+
   def axis_interval_well_formed(self, interval):
+    """Tests if the provided axis interval is well-formed according to the spec."""
     # start is set.
     # end is not set or >= start.
     self.test_case.assertTrue(
         axis_util.AXIS_START in interval,
         self.conform_message("conform-axis-interval-start",
                              "AxisInterval.start must be set."))
+
     if axis_util.AXIS_END not in interval:
+      self.tested("conform-axis-interval-end")
       return
 
-    self.test_case.assertGreater(interval[axis_util.AXIS_END], interval[axis_util.AXIS_START],
-                                 self.conform_message("conform-axis-interval-start",
-                                                      "AxisInterval.end must be greater than start."))
+    self.test_case.assertGreater(
+        interval[axis_util.AXIS_END], interval[axis_util.AXIS_START],
+        self.conform_message("conform-axis-interval-end",
+                             "AxisInterval.end must be greater than start."))
 
   def is_error_400(self, extra_tag=None):
     """Checks that the response has status code 400."""
